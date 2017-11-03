@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 from flask_mail import Mail, Message
+from flask import jsonify
 from logging import config
 import logging
 
@@ -19,6 +20,17 @@ config.fileConfig('logging.conf')
 @app.route('/')
 def home():
     return render_template(HOME_PAGE)
+
+
+@app.route('/healthcheck')
+def health_check():
+    logging.info('Health check - available...')
+    response = jsonify({
+        "version": app.config["VERSION"],
+        "status": 'AVAILABLE'
+    })
+    response.status_code = 200
+    return response
 
 
 @app.route('/send', methods=["POST"])
