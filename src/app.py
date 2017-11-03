@@ -1,5 +1,5 @@
 # import the Flask class from the flask module
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 # create the application object
 app = Flask(__name__)
@@ -12,12 +12,10 @@ def home():
     return render_template(HOME_PAGE)
 
 
-@app.route('/<email>', methods=["POST"])
-def send(email):
-    # TODO - send email
-    print('Sending an email to: {}'.format(email))
-
-    return render_template(HOME_PAGE)
+@app.route('/send', methods=["POST"])
+def send_email():
+    email = request.form['email']
+    return 'Send email: %s' % email
 
 
 # start the server with the 'run()' method
