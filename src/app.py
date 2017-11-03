@@ -14,10 +14,11 @@ def home():
 
 @app.route('/send', methods=["POST"])
 def send_email():
-    email = request.form['email']
-    return 'Send email: %s' % email
+    # email = request.form['email_smell']
+    # return 'Send email: ' % email
+    return 'Send'
 
 
 # start the server with the 'run()' method
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, threaded=True)
+    app.run(host="0.0.0.0", port=5000, threaded=True, debug=True)

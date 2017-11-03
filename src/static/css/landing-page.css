@@ -1,4 +1,4 @@
-/*/
+/*!
  * Start Bootstrap - Landing Page (https://startbootstrap.com/template-overviews/landing-page)
  * Copyright 2013-2017 Start Bootstrap
  * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap-landing-page/blob/master/LICENSE)
@@ -16,8 +16,8 @@ body, h1, h2, h3, h4, h5, h6 {
 }
 
 .intro-header {
-    padding-top: 25px;
-    padding-bottom: 25px;
+    padding-top: 50px;
+    padding-bottom: 50px;
     text-align: center;
     color: #f8f8f8;
     background: url(../img/intro-bg.jpg) no-repeat center center;
@@ -32,22 +32,6 @@ body, h1, h2, h3, h4, h5, h6 {
     background-color: #F05F40 !important;
 }
 
-.intro-message {
-    position: relative;
-    padding-top: 20%;
-    padding-bottom: 20%;
-}
-
-.intro-message>h1 {
-    margin: 0;
-    text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.6);
-    font-size: 5em;
-}
-
-.intro-message>h3 {
-    text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.6);
-}
-
 .form {
     width: 100%;
     text-align: center;
@@ -60,11 +44,74 @@ body, h1, h2, h3, h4, h5, h6 {
     text-align: center;
 }
 
+.intro-message {
+    position: relative;
+    padding-top: 20%;
+    padding-bottom: 20%;
+}
+
+.intro-message>h1 {
+    margin: 0;
+    text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.6);
+    font-size: 5em;
+}
+
+.intro-divider {
+    width: 400px;
+    border-top: 1px solid #f8f8f8;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.intro-message>h3 {
+    text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.6);
+}
+
+.intro-social-buttons i {
+    font-size: 80%;
+}
+
+@media(max-width:767px) {
+    .intro-message {
+        padding-bottom: 15%;
+    }
+    .intro-message>h1 {
+        font-size: 3em;
+    }
+    ul.intro-social-buttons>li {
+        display: block;
+        margin-bottom: 20px;
+        padding: 0;
+    }
+    ul.intro-social-buttons>li:last-child {
+        margin-bottom: 0;
+    }
+    .intro-divider {
+        width: 100%;
+    }
+
+    .banner h2 {
+        margin: 0;
+        text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.6);
+        font-size: 3em;
+    }
+}
+
 .network-name {
     text-transform: uppercase;
     font-size: 14px;
     font-weight: 400;
     letter-spacing: 2px;
+}
+
+.content-section-a {
+    padding: 50px 0;
+    background-color: #f8f8f8;
+}
+
+.content-section-b {
+    padding: 50px 0;
+    border-top: 1px solid #e7e7e7;
+    border-bottom: 1px solid #e7e7e7;
 }
 
 .section-heading {
@@ -77,23 +124,50 @@ body, h1, h2, h3, h4, h5, h6 {
     border-top: 3px solid #e7e7e7;
 }
 
-footer {
-    padding: 5px 0;
-    background-color: #f8f8f8;
+.banner {
+    padding: 100px 0;
+    color: #f8f8f8;
+    background: url(../img/banner-bg.jpg) no-repeat center center;
+    background-size: cover;
 }
 
-p.copyright {
-    /*margin: 5px 0 0;*/
-    margin: auto;
-    text-align: center;
+.banner h2 {
+    margin: 0;
+    text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.6);
+    font-size: 3em;
+}
+
+.banner ul {
+    margin-bottom: 0;
+}
+
+.banner-social-buttons {
+    float: right;
+    margin-top: 0;
+}
+
+@media(max-width:1199px) {
+    ul.banner-social-buttons {
+        float: left;
+        margin-top: 15px;
+    }
 }
 
 @media (max-width: 992px) {
     .form-centered {
         width: 60%;
     }
-
 }
+
+footer {
+    padding: 10px 0;
+    background-color: #f8f8f8;
+}
+
+p.copyright {
+    margin: 10px 0 0;
+}
+
 @media(max-width:767px) {
     .intro-message {
         padding-bottom: 15%;
