@@ -4,6 +4,7 @@ from flask import Flask, render_template, request
 # create the application object
 app = Flask(__name__)
 HOME_PAGE = 'index.html'
+SENT = 'sent.html'
 
 
 # use decorators to link the function to a url
@@ -16,7 +17,7 @@ def home():
 def send_email():
     # email = request.form['email_smell']
     # return 'Send email: ' % email
-    return 'Send'
+    return render_template(SENT)
 
 
 # start the server with the 'run()' method
