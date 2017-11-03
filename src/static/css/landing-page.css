@@ -24,6 +24,14 @@ body, h1, h2, h3, h4, h5, h6 {
     background-size: cover;
 }
 
+.intro-content {
+    padding-top: 25px;
+    padding-bottom: 25px;
+    text-align: center;
+    color: #f8f8f8;
+    background-color: #F05F40 !important;
+}
+
 .intro-message {
     position: relative;
     padding-top: 20%;
@@ -47,18 +55,9 @@ body, h1, h2, h3, h4, h5, h6 {
 }
 
 .form-centered {
-    width: 60%;
+    width: 40%;
     margin: auto;
     text-align: center;
-}
-
-@media(max-width:767px) {
-    .intro-message {
-        padding-bottom: 15%;
-    }
-    .intro-message>h1 {
-        font-size: 3em;
-    }
 }
 
 .network-name {
@@ -87,4 +86,38 @@ p.copyright {
     /*margin: 5px 0 0;*/
     margin: auto;
     text-align: center;
+}
+
+@media (max-width: 992px) {
+    .form-centered {
+        width: 60%;
+    }
+
+}
+@media(max-width:767px) {
+    .intro-message {
+        padding-bottom: 15%;
+    }
+    .intro-message>h1 {
+        font-size: 3em;
+    }
+    .form-centered {
+        width: 70%;
+    }
+}
+@media(max-width:640px) {
+    .intro-header .intro-message {
+        padding-bottom: 15%;
+        padding-top: 110px;
+    }
+    .intro-content .intro-message {
+        padding-bottom: 15%;
+        padding-top: 50px;
+    }
+    .intro-header .intro-message > h3 {
+        font-size: 2em;
+    }
+    .form-centered {
+        width: 80%;
+    }
 }
