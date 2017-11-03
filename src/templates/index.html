@@ -42,11 +42,12 @@
                 <div class="form">
                     <form action="/send" id="form_drink" method="post" class="form-centered">
                         <div class="input-group">
-                            <input type="text" class="form-control" value="friend@gmail.com" id="email_drink" name="email_drink" />
+                            <input type="text" class="form-control" placeholder="friend@email.com, girlfriend@gmail.com" name="email" required />
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="submit">Send</button>
                             </span>
                         </div><!-- /input-group -->
+                        <input type="hidden" name="template" value="drink" />
                     </form>
                 </div><!-- /.col-lg-4 -->
             </div><!-- /.row -->
@@ -90,11 +91,12 @@
                 <div class="form">
                     <form action="/send" id="form_smell" method="post" class="form-centered">
                         <div class="input-group">
-                            <input type="text" class="form-control" value="colleague@email.com" id="email_smell" name="email_smell" />
+                            <input type="text" class="form-control" placeholder="colleague@email.com, coworker@gmail.com" name="email" required />
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="submit">Send</button>
                             </span>
                         </div><!-- /input-group -->
+                        <input type="hidden" name="template" value="smell" />
                     </form>
                 </div><!-- /.col-lg-4 -->
             </div><!-- /.row -->
