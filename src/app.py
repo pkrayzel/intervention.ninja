@@ -3,6 +3,7 @@ from flask_mail import Mail, Message
 from flask import jsonify
 from logging import config
 import logging
+import os
 
 # constants
 HOME_PAGE = 'index.html'
@@ -13,6 +14,8 @@ SUPPORTED_TEMPLATES = ['drink', 'smell']
 
 app = Flask(__name__)
 app.config.from_object('config')
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 mail = Mail(app)
 
 config.fileConfig('logging.conf')
