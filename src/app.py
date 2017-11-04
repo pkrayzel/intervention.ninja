@@ -7,8 +7,9 @@ import logging
 # constants
 HOME_PAGE = 'index.html'
 SENT = 'sent.html'
-DRINK = 'drink'
-SMELL = 'smell'
+KEY_EMAIL = 'email'
+KEY_TEMPLATE = 'template'
+SUPPORTED_TEMPLATES = ['drink', 'smell']
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -35,20 +36,35 @@ def health_check():
 
 @app.route('/send', methods=["POST"])
 def send_email():
-    email = request.form['email']
-    template = request.form['template']
+    if KEY_EMAIL not in request.form \
+            or KEY_TEMPLATE not in request.form:
+        return construct_error_response(400, "Bad request. All required input parameters should be provided.")
 
-    msg = Message('Hello', sender='intervention.ninja@gmail.com', recipients=email.split(','))
+    email = request.form[KEY_EMAIL]
+    template = request.form[KEY_TEMPLATE]
 
-    if template == DRINK:
-        msg.body = "Hey, could you please stop drinking so much? Cheers!"
-    elif template == SMELL:
-        msg.body = "Hey, have you ever seen shower? Someone thinks that you smell like sh*t! Cheers!"
+    if template not in SUPPORTED_TEMPLATES:
+        return construct_error_response(400, "Given template value is not supported.")
+
+    msg = Message('Intervention Ninja - personal message',
+                  sender='intervention.ninja@gmail.com',
+                  recipients=email.split(','))
+    msg.body = render_template('emails/{}.txt'.format(template))
+    msg.html = render_template('emails/{}.html'.format(template))
 
     logging.info('Sending email to recipient: {} with template: {}'.format(email, template))
     mail.send(msg)
 
     return render_template(SENT)
+
+
+def construct_error_response(message, status_code):
+    response = jsonify({
+        "code": status_code,
+        "message": message
+    })
+    response.status_code = status_code
+    return response
 
 
 # start the server with the 'run()' method

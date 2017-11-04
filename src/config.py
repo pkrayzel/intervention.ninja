@@ -1,4 +1,4 @@
-DEBUG = True
+DEBUG = False
 THREADED = True
 
 MAIL_SERVER = 'smtp.gmail.com'
