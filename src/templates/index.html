@@ -1,0 +1,34 @@
+{% extends "common/base.html" %}
+{% block page_content %}
+{% from 'macros/social_buttons.html' import social_buttons %}
+{% from 'macros/message_form.html' import message_form %}
+
+<!-- Header -->
+<header class="intro-header">
+    <div class="container">
+        <div class="intro-message">
+            {{ message_form('Does your friend drink too much?', 'drink') }}
+            <hr class="intro-divider">
+            {{ social_buttons() }}
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<div class="intro-content">
+    <div class="container">
+        <div class="intro-message">
+            {{ message_form('Do you have a colleague, who smells like sh*t?', 'smell') }}
+            <hr class="intro-divider">
+            {{ social_buttons() }}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

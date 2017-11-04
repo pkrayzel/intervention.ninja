@@ -1,0 +1,18 @@
+{% extends "common/base.html" %}
+{% block page_content %}
+{% from 'macros/social_buttons.html' import social_buttons %}
+
+<!-- Header -->
+<header class="intro-sent">
+    <div class="container">
+        <div class="intro-message">
+            <h1>Done!</h1><br />
+
+            <a class="btn btn-light btn-xl js-scroll-trigger" href="/">Let's send another</a>
+            <hr class="intro-divider">
+            {{ social_buttons() }}
+        </div>
+    </div>
+</header>
+
+{% endblock %}
