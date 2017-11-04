@@ -1,91 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Intervention Ninja - See it, Say it, Sorted! Some things might be too difficult to say. Ninja can do that for you!">
-    <meta name="author" content="Pavel Krayzel">
-
-    <link rel="icon" type="image/png" href="static/favicon.ico">
-
-    <title>Intervention Ninja - See it, Say it, Sorted!</title>
-
-    <!-- Bootstrap core CSS -->
-    <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Custom fonts for this template -->
-    <link href="static/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
-
-    <!-- Custom styles for this template-->
-    <link href="static/css/landing-page.css" rel="stylesheet">
-
-</head>
-
-<body>
-
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-109149768-1"></script>
-<script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'UA-109149768-1');
-</script>
-
-
-<!-- Navigation -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-    <div class="container">
-        <h4>Some things might be too difficult to say. Intervention Ninja can do that for you!</h4>
-    </div>
-</nav>
+{% extends "base.html" %}
+{% block page_content %}
+{% from 'social_buttons.html' import social_buttons %}
+{% from 'message_form.html' import message_form %}
 
 <!-- Header -->
 <header class="intro-header">
     <div class="container">
         <div class="intro-message">
-            <h3>Does your friend drink too much?</h3>
-            <h3>Tell him / her! Anonymously.</h3>
-            <div class="row">
-                <div class="form">
-                    <form action="/send" id="form_drink" method="post" class="form-centered">
-                        <div class="input-group">
-                            <input type="email" data-fv-emailaddress-message="The value is not a valid email address."
-                                   class="form-control" placeholder="friend@email.com, girlfriend@gmail.com" name="email" required />
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" type="submit">Send</button>
-                            </span>
-                        </div><!-- /input-group -->
-                        <input type="hidden" name="template" value="drink" />
-                    </form>
-                </div><!-- /.col-lg-4 -->
-            </div><!-- /.row -->
-
+            {{ message_form('Does your friend drink too much?', 'drink') }}
             <hr class="intro-divider">
-            <ul class="list-inline intro-social-buttons">
-                <li class="list-inline-item">
-                    <a class="btn btn-secondary btn-lg" target="_blank" href="http://www.facebook.com/sharer.php?u=http://www.intervention.ninja&t=Intervention%20Ninja">
-                        <i class="fa fa-facebook fa-fw"></i>
-                        <span class="network-name">Facebook</span>
-                    </a>
-                </li>
-                <li class="list-inline-item">
-                    <a href="http://twitter.com/home?status=Does%20your%20friend%20drink%20too%20much?%20Tell%20him%20/%20her!%20Anonymously!%20+http://www.intervention.ninja" target="_blank" class="btn btn-secondary btn-lg">
-                        <i class="fa fa-twitter fa-fw"></i>
-                        <span class="network-name">Twitter</span>
-                    </a>
-                </li>
-                <li class="list-inline-item">
-                    <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://www.intervention.ninja&title=Intervention%20Ninja%20" target="_blank" class="btn btn-secondary btn-lg">
-                        <i class="fa fa-linkedin fa-fw"></i>
-                        <span class="network-name">Linkedin</span>
-                    </a>
-                </li>
-            </ul>
-
+            {{ social_buttons() }}
 
         </div>
 
@@ -97,44 +21,9 @@
 <div class="intro-content">
     <div class="container">
         <div class="intro-message">
-            <h3>Do you have a colleague, who smells like sh*t?</h3>
-            <h3>Tell him / her! Anonymously.</h3>
-            <div class="row">
-                <div class="form">
-                    <form action="/send" id="form_smell" method="post" class="form-centered">
-                        <div class="input-group">
-                            <input type="email" data-fv-emailaddress-message="The value is not a valid email address."
-                                   class="form-control" placeholder="colleague@email.com, coworker@gmail.com" name="email" required />
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" type="submit">Send</button>
-                            </span>
-                        </div><!-- /input-group -->
-                        <input type="hidden" name="template" value="smell" />
-                    </form>
-                </div><!-- /.col-lg-4 -->
-            </div><!-- /.row -->
-
+            {{ message_form('Do you have a colleague, who smells like sh*t?', 'smell') }}
             <hr class="intro-divider">
-            <ul class="list-inline intro-social-buttons">
-                <li class="list-inline-item">
-                    <a class="btn btn-secondary btn-lg" target="_blank" href="http://www.facebook.com/sharer.php?u=http://www.intervention.ninja&t=Intervention%20Ninja">
-                    <i class="fa fa-facebook fa-fw"></i>
-                        <span class="network-name">Facebook</span>
-                    </a>
-                </li>
-                <li class="list-inline-item">
-                    <a href="http://twitter.com/home?status=Do%20you%20have%20a%20colleague,%20who%20smells%20like%20sh*t?%20Tell%20him%20/%20her!%20Anonymously!%20+http://www.intervention.ninja" target="_blank" class="btn btn-secondary btn-lg">
-                        <i class="fa fa-twitter fa-fw"></i>
-                        <span class="network-name">Twitter</span>
-                    </a>
-                </li>
-                <li class="list-inline-item">
-                    <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://www.intervention.ninja&title=Intervention%20Ninja%20" target="_blank" class="btn btn-secondary btn-lg">
-                        <i class="fa fa-linkedin fa-fw"></i>
-                        <span class="network-name">Linkedin</span>
-                    </a>
-                </li>
-            </ul>
+            {{ social_buttons() }}
 
         </div>
 
@@ -142,17 +31,4 @@
 
 </div>
 
-<!-- Footer -->
-<footer>
-    <div class="container">
-        <p class="copyright text-muted small">Copyright &copy; Pavel Krayzel 2017. All Rights Reserved</p>
-    </div>
-</footer>
-
-<!-- Bootstrap core JavaScript -->
-<script src="static/vendor/jquery/jquery.min.js"></script>
-<script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-</body>
-
-</html>
+{% endblock %}
