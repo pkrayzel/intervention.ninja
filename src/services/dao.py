@@ -2,6 +2,7 @@ import boto3
 import logging
 from datetime import datetime
 import time
+import uuid
 
 client_dynamo = boto3.client('dynamodb')
 
@@ -10,6 +11,9 @@ def store_mail_sent(email, template):
     date = datetime.now()
 
     item = {
+        'guid': {
+            'S': str(uuid.uuid4())
+        },
         'email': {
             'S': email
         },
