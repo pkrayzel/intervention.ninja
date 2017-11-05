@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request
-from flask_mail import Mail, Message
 from flask import jsonify
 from logging import config
 import logging
 import os
+from services.mail import MailService
+from services import dao
 
 # constants
 HOME_PAGE = 'index.html'
@@ -16,9 +17,10 @@ app = Flask(__name__)
 app.config.from_object('config')
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
-mail = Mail(app)
 
 config.fileConfig('logging.conf')
+
+mail = MailService()
 
 
 @app.route('/')
@@ -49,14 +51,9 @@ def send_email():
     if template not in SUPPORTED_TEMPLATES:
         return construct_error_response(400, "Given template value is not supported.")
 
-    msg = Message('Intervention Ninja - personal message',
-                  sender='intervention.ninja@gmail.com',
-                  recipients=email.split(','))
-    msg.body = render_template('emails/{}.txt'.format(template))
-    msg.html = render_template('emails/{}.html'.format(template))
+    mail.send_mail(email, template)
 
-    logging.info('Sending email to recipient: {} with template: {}'.format(email, template))
-    mail.send(msg)
+    dao.store_mail_sent(email, template)
 
     return render_template(SENT)
 
