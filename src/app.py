@@ -3,15 +3,11 @@ from flask import jsonify
 from logging import config
 import logging
 import os
-from services.mail import MailService
-from services import dao
+from services import dao, common
 
 # constants
 HOME_PAGE = 'index.html'
 SENT = 'sent.html'
-KEY_EMAIL = 'email'
-KEY_TEMPLATE = 'template'
-SUPPORTED_TEMPLATES = ['drink', 'smell']
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -19,8 +15,6 @@ app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 
 config.fileConfig('logging.conf')
-
-mail = MailService()
 
 
 @app.route('/')
@@ -41,30 +35,15 @@ def health_check():
 
 @app.route('/send', methods=["POST"])
 def send_email():
-    if KEY_EMAIL not in request.form \
-            or KEY_TEMPLATE not in request.form:
-        return construct_error_response(400, "Bad request. All required input parameters should be provided.")
+    try:
+        logging.info("flask_app send handler: {}".format(request.form))
 
-    email = request.form[KEY_EMAIL]
-    template = request.form[KEY_TEMPLATE]
-
-    if template not in SUPPORTED_TEMPLATES:
-        return construct_error_response(400, "Given template value is not supported.")
-
-    mail.send_mail(email, template)
-
-    dao.store_mail_sent(email, template)
-
+        body = request.form
+        context = dict(source_ip=request.remote_addr)
+        common.validate_send_email(body, context)
+    except Exception as e:
+        logging.error('Exception during sending email', e)
     return render_template(SENT)
-
-
-def construct_error_response(message, status_code):
-    response = jsonify({
-        "code": status_code,
-        "message": message
-    })
-    response.status_code = status_code
-    return response
 
 
 # start the server with the 'run()' method

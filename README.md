@@ -1,3 +1,7 @@
+API endpoint:
+
+https://j5fn6skeh5.execute-api.eu-west-1.amazonaws.com/prod/intervention-ninja-lambda
+
 # intervention.ninja
 
 The purpose of this project is to help people deal with difficult announcements to their friends / coworkers.
