@@ -44,7 +44,7 @@ def validate_send_email(body, context):
     if count >= MAX_EMAILS_PER_EMAIL_PER_MINUTE:
         return construct_response(429, "Limit of requests for single email per minute exceeded.")
 
-    # mail.send_mail(email, template)
+    mail.send_mail(email, template)
 
     dao.store_ip_address(source_ip)
     dao.store_email(email, template)
