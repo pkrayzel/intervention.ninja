@@ -2,63 +2,95 @@ import boto3
 import logging
 from datetime import datetime
 import time
-import uuid
+from boto3.dynamodb.conditions import Key, Attr
 
 client_dynamo = boto3.client('dynamodb')
+resource_dynamo = boto3.resource('dynamodb')
 
-FILTER_FIELD_IP_ADDRESS = 'ip_address'
-FILTER_FIELD_TIMESTAMP_GREATER_THAN = 'timestamp_gt'
-FILTER_FIELD_EMAIL = 'email'
+TABLE_NAME_EMAILS = 'intervention_ninja_emails'
+TABLE_NAME_IP_ADDRESSES = 'intervention_ninja_ips'
 
 
-def store_mail_sent(source_ip, email, template):
+def store_ip_address(source_ip):
+    item = _construct_common_item()
+    item['ip_address'] = {'S': source_ip}
+    return _put_item(TABLE_NAME_IP_ADDRESSES, item)
+
+
+def store_email(email, template):
+    item = _construct_common_item()
+    item['email'] = {'S': email}
+    item['template'] = {'S': template}
+    return _put_item(TABLE_NAME_EMAILS, item)
+
+
+def _construct_common_item():
     date = datetime.now()
-
     item = {
-        'guid': {
-            'S': str(uuid.uuid4())
-        },
-        'ip_address': {
-            'S': source_ip
-        },
-        'email': {
-            'S': email
-        },
-        'template': {
-            'S': template
-        },
-        'date': {
-            'S': date.strftime("%Y/%m/%d")
-        },
-        'time': {
-            'S': date.strftime("%H:%M:%S")
-        },
-        'timestamp': {
-            'S': str(int(time.mktime(date.timetuple())))
-        }
+        'timestamp': {'N': str(int(time.mktime(date.timetuple())) * 1000)},
+        'date': {'S': date.strftime("%Y/%m/%d")},
+        'time': {'S': date.strftime("%H:%M:%S")},
     }
-    logging.info('Sending data to DynamoDB - item: {}'.format(item))
+    return item
+
+
+def _put_item(table_name, item):
+    logging.info('Putting item into DynamoDB - table_name: {}, item: {}'.format(table_name, item))
     try:
         response = client_dynamo.put_item(
-            TableName='ninja_emails',
+            TableName=table_name,
             Item=item
         )
         logging.info('DynamoDB response: {}'.format(response))
+        return True
     except Exception as exception:
-        logging.error('Error during dynamodb request: {}', exception)
+        logging.error('Error during dynamodb put_item: %s', exception)
+        return False
 
 
-def get_count_for_filter(filter_criteria):
-    logging.info('Querying DynamoDB - filter_criteria: {}'.format(filter_criteria))
+def get_count_for_email(email, time_period_limit):
+    return _get_count_for_filter(TABLE_NAME_EMAILS,
+                                 'timestamp',
+                                 _get_timestamp(time_period_limit),
+                                 'email',
+                                 email)
+
+
+def get_count_for_ip_address(ip_address, time_period_limit):
+    return _get_count_for_filter(TABLE_NAME_IP_ADDRESSES,
+                                 'timestamp',
+                                 _get_timestamp(time_period_limit),
+                                 'ip_address',
+                                 ip_address)
+
+
+def _get_timestamp(time_period_limit):
+    timestamp = int(time.mktime(datetime.now().timetuple())) - time_period_limit
+    print('time_period_limit: {}, timestamp: {}'.format(time_period_limit, timestamp))
+    return timestamp
+
+
+def _get_count_for_filter(table_name,
+                          key_field,
+                          key_value,
+                          filter_field,
+                          filter_value):
+    logging.info('Querying DynamoDB - table_name: {}, '
+                 'key_field: {}, '
+                 'key_value: {}, '
+                 'filter_field: {},'
+                 'filter_value: {}'
+                 .format(table_name, key_field, key_value,
+                         filter_field, filter_value))
     try:
-        pass
-        # response = client_dynamo.put_item(
-        #     TableName='ninja_emails',
-        #     Item=item
-        # )
-        # logging.info('DynamoDB response: {}'.format(response))
-    except Exception as exception:
-        pass
-        # logging.error('Error during dynamodb request: {}', exception)
+        table = resource_dynamo.Table(table_name)
 
-    return 0
+        response = table.scan(
+            FilterExpression=Key(key_field).gt(key_value) & Attr(filter_field).eq(filter_value)
+        )
+        count = len(response['Items'])
+        logging.info('number of items in dynamodb: {}'.format(count))
+        return count
+    except Exception as exception:
+        logging.error('Error during dynamodb get_count_for_filter: %s', exception)
+    return -1

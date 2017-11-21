@@ -1,6 +1,5 @@
 from services.mail import MailService
 from services import dao
-from services.dao import *
 from services import common
 import logging
 import json
@@ -33,25 +32,23 @@ def validate_send_email(body, context):
     if template not in SUPPORTED_TEMPLATES:
         return construct_response(400, "Given template value is not supported.")
 
-    timestamp = int(time.mktime(datetime.now().timetuple())) - MILLISECONDS_PER_MINUTE
-
     # check whether from given ip address hasn't been sent email in last 1 minute
-    count = dao.get_count_for_filter({FILTER_FIELD_IP_ADDRESS: source_ip,
-                                      FILTER_FIELD_TIMESTAMP_GREATER_THAN: timestamp})
+    count = dao.get_count_for_ip_address(source_ip, MILLISECONDS_PER_MINUTE)
 
     if count >= MAX_EMAILS_PER_IP_PER_MINUTE:
         return construct_response(429, "Limit of requests from IP address per minute exceeded.")
 
     # check whether from given ip address hasn't been sent email in last 1 minute
-    count = dao.get_count_for_filter({FILTER_FIELD_EMAIL: email,
-                                      FILTER_FIELD_TIMESTAMP_GREATER_THAN: timestamp})
+    count = dao.get_count_for_email(email, MILLISECONDS_PER_MINUTE)
 
     if count >= MAX_EMAILS_PER_EMAIL_PER_MINUTE:
         return construct_response(429, "Limit of requests for single email per minute exceeded.")
 
-    mail.send_mail(email, template)
+    # mail.send_mail(email, template)
 
-    dao.store_mail_sent(source_ip, email, template)
+    dao.store_ip_address(source_ip)
+    dao.store_email(email, template)
+
     return construct_response(200, "")
 
 
