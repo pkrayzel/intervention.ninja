@@ -1,4 +1,3 @@
-# import intervention_ninja_lambda
 import os
 import sys
 from src.services import dao

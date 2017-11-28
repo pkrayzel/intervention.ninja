@@ -22,13 +22,3 @@ def email_smell():
 def email_drink():
     return render_template('emails/drink.html')
 
-
-@app.route('/emails/smell.txt')
-def email_smell_text():
-    return render_template('emails/smell.txt')
-
-
-@app.route('/emails/drink.txt')
-def email_drink_text():
-    return render_template('emails/drink.txt')
-
