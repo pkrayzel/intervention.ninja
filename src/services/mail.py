@@ -2,6 +2,9 @@ from flask_mail import Mail, Message
 from flask import current_app, render_template
 import logging
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
 
 class MailService:
     def __init__(self):
@@ -14,7 +17,7 @@ class MailService:
         msg.body = render_template('emails/{}.txt'.format(template))
         msg.html = render_template('emails/{}.html'.format(template))
 
-        logging.info('Sending email to recipient: {} with template: {}'.format(email, template))
+        logger.info('Sending email to recipient: {} with template: {}'.format(email, template))
         self._get_mail().send(msg)
 
     def _get_mail(self):

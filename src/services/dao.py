@@ -4,6 +4,9 @@ from datetime import datetime
 import time
 from boto3.dynamodb.conditions import Key, Attr
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
 client_dynamo = boto3.client('dynamodb')
 resource_dynamo = boto3.resource('dynamodb')
 
@@ -35,16 +38,16 @@ def _construct_common_item():
 
 
 def _put_item(table_name, item):
-    logging.info('Putting item into DynamoDB - table_name: {}, item: {}'.format(table_name, item))
+    logger.info('Putting item into DynamoDB - table_name: {}, item: {}'.format(table_name, item))
     try:
         response = client_dynamo.put_item(
             TableName=table_name,
             Item=item
         )
-        logging.info('DynamoDB response: {}'.format(response))
+        logger.info('DynamoDB response: {}'.format(response))
         return True
     except Exception as exception:
-        logging.error('Error during dynamodb put_item: %s', exception)
+        logger.error('Error during dynamodb put_item: %s', exception)
         return False
 
 
@@ -65,7 +68,7 @@ def get_count_for_ip_address(ip_address, time_period_limit):
 
 
 def _get_timestamp(time_period_limit):
-    timestamp = int(time.mktime(datetime.now().timetuple())) - time_period_limit
+    timestamp = int(time.mktime(datetime.now().timetuple()) * 1000) - time_period_limit
     print('time_period_limit: {}, timestamp: {}'.format(time_period_limit, timestamp))
     return timestamp
 
@@ -75,11 +78,8 @@ def _get_count_for_filter(table_name,
                           key_value,
                           filter_field,
                           filter_value):
-    logging.info('Querying DynamoDB - table_name: {}, '
-                 'key_field: {}, '
-                 'key_value: {}, '
-                 'filter_field: {},'
-                 'filter_value: {}'
+    logger.info('Querying DynamoDB - table_name: {}, key_field: {}, '
+                'key_value: {}, filter_field: {}, filter_value: {}'
                  .format(table_name, key_field, key_value,
                          filter_field, filter_value))
     try:
@@ -89,8 +89,8 @@ def _get_count_for_filter(table_name,
             FilterExpression=Key(key_field).gt(key_value) & Attr(filter_field).eq(filter_value)
         )
         count = len(response['Items'])
-        logging.info('number of items in dynamodb: {}'.format(count))
+        logger.info('number of items in dynamodb: {}'.format(count))
         return count
     except Exception as exception:
-        logging.error('Error during dynamodb get_count_for_filter: %s', exception)
+        logger.error('Error during dynamodb get_count_for_filter: %s', exception)
     return -1

@@ -4,6 +4,9 @@ from services import common
 import logging
 import json
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
 mail = MailService()
 
 KEY_EMAIL = 'email'
@@ -18,7 +21,7 @@ MILLISECONDS_PER_MINUTE = 60 * 1000
 
 
 def validate_send_email(body, context):
-    logging.info('validate_send_email: {}, {}'.format(body, context))
+    logger.info('validate_send_email: {}, {}'.format(body, context))
 
     if KEY_EMAIL not in body \
         or KEY_TEMPLATE not in body \
@@ -68,6 +71,6 @@ def construct_response(status_code, message, response_body=None):
             'Content-Type': 'application/json',
         },
     }
-    logging.info('constructing response - {}'.format(result))
+    logger.info('constructing response - {}'.format(result))
 
     return result
