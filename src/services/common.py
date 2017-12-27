@@ -1,6 +1,6 @@
-from src.services.mail import MailService
-from src.services.template import TemplateServiceS3
-from src.services import dao
+from services.mail import MailService
+from services.template import TemplateServiceS3
+from services import dao
 import logging
 import json
 
@@ -12,7 +12,7 @@ mail_template_service = TemplateServiceS3('www.intervention.ninja', 'emails/')
 
 KEY_EMAIL = 'email'
 KEY_TEMPLATE = 'template'
-KEY_SOURCE_IP = 'source_ip'
+KEY_SOURCE_IP = 'source-ip'
 SUPPORTED_TEMPLATES = ['drink', 'smell']
 
 MAX_EMAILS_PER_IP_PER_MINUTE = 1

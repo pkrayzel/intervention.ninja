@@ -1,11 +1,7 @@
 import json
 import logging
-from src.services.dao import *
-from src.services import common
-
-KEY_EMAIL = 'email'
-KEY_TEMPLATE = 'template'
-KEY_SOURCE_IP = 'source_ip'
+from services.dao import *
+from services import common
 
 KEY_BODY = 'body'
 KEY_CONTEXT = 'context'
@@ -27,11 +23,6 @@ def lambda_handler(event, context):
         context_body = data if KEY_CONTEXT not in data else data[KEY_CONTEXT]
 
         logger.info('body: {}, context_body: {}'.format(body, context_body))
-
-        if KEY_EMAIL not in body \
-                or KEY_TEMPLATE not in body \
-                or KEY_SOURCE_IP not in context_body:
-            return common.construct_response_bad_request()
 
         return common.validate_send_email(body, context_body)
     except Exception as e:
