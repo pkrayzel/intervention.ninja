@@ -1,7 +1,7 @@
 import json
 import logging
-from services.dao import *
-from services import common
+from src.services.dao import *
+from src.services import common
 
 KEY_EMAIL = 'email'
 KEY_TEMPLATE = 'template'
@@ -37,3 +37,6 @@ def lambda_handler(event, context):
     except Exception as e:
         logger.error('Exception during sending email: %s', e)
         return common.construct_response_server_error()
+
+
+lambda_handler({'email': 'a'}, None)

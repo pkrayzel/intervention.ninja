@@ -30,7 +30,7 @@ def validate_send_email(body, context):
     if KEY_EMAIL not in body \
         or KEY_TEMPLATE not in body \
         or KEY_SOURCE_IP not in context:
-        return _construct_response_bad_request()
+        return construct_response_bad_request()
 
     email = body[KEY_EMAIL]
     template = body[KEY_TEMPLATE]
@@ -60,11 +60,11 @@ def validate_send_email(body, context):
     return _construct_response(200, "")
 
 
-def _construct_response_bad_request():
+def construct_response_bad_request():
     return _construct_response(400, "Bad request. All required input parameters should be provided.")
 
 
-def _construct_response_server_error():
+def construct_response_server_error():
     return _construct_response(500, "Something is wrong!")
 
 
