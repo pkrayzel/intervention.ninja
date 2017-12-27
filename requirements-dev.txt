@@ -1,3 +1,0 @@
-awscli==1.11.172
-pytest
-Frozen-Flask==0.15

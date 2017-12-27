@@ -37,6 +37,3 @@ def lambda_handler(event, context):
     except Exception as e:
         logger.error('Exception during sending email: %s', e)
         return common.construct_response_server_error()
-
-
-lambda_handler({'email': 'a'}, None)

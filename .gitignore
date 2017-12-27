@@ -5,8 +5,11 @@ __pycache__
 
 src/build
 src/build/*
+
 utils/build
 utils/build/*
+utils/dist
+utils/dist.zip
 
 log.txt
 
