@@ -27,9 +27,14 @@ MAIL_SENDER = 'intervention.ninja@gmail.com'
 def validate_send_email(body, context):
     logger.info('validate_send_email: {}, {}'.format(body, context))
 
-    if KEY_EMAIL not in body \
-        or KEY_TEMPLATE not in body \
-        or KEY_SOURCE_IP not in context:
+    if KEY_EMAIL not in body:
+        logger.warning('Missing required parameter: {}'.format(KEY_EMAIL))
+        return construct_response_bad_request()
+    elif KEY_TEMPLATE not in body:
+        logger.warning('Missing required parameter: {}'.format(KEY_TEMPLATE))
+        return construct_response_bad_request()
+    elif KEY_SOURCE_IP not in context:
+        logger.warning('Missing required parameter: {}'.format(KEY_SOURCE_IP))
         return construct_response_bad_request()
 
     email = body[KEY_EMAIL]
@@ -37,18 +42,24 @@ def validate_send_email(body, context):
     source_ip = context[KEY_SOURCE_IP]
 
     if template not in SUPPORTED_TEMPLATES:
+        logger.warning('Template is not supported: {}. Should be one of: {}'
+                     .format(template, SUPPORTED_TEMPLATES))
         return _construct_response(400, "Given template value is not supported.")
 
     # check whether from given ip address hasn't been sent email in last 1 minute
     count = dao.get_count_for_ip_address(source_ip, MILLISECONDS_PER_MINUTE)
 
     if count >= MAX_EMAILS_PER_IP_PER_MINUTE:
+        logger.warning('Maximum emails from IP: {} per minute achieved: {}'
+                       .format(source_ip, count))
         return _construct_response(429, "Limit of requests from IP address per minute exceeded.")
 
     # check whether from given ip address hasn't been sent email in last 1 minute
     count = dao.get_count_for_email(email, MILLISECONDS_PER_MINUTE)
 
     if count >= MAX_EMAILS_PER_EMAIL_PER_MINUTE:
+        logger.warning('Maximum emails {} per minute achieved: {}'
+                       .format(email, count))
         return _construct_response(429, "Limit of requests for single email per minute exceeded.")
 
     content_html = mail_template_service.render_template('{}.html'.format(template))
