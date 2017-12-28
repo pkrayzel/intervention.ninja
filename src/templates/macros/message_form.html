@@ -4,17 +4,68 @@
 <h3>Tell him / her! Anonymously.</h3>
 <div class="row">
     <div class="form">
-        <form action="/send" id="form_{{ template }}" method="post" class="form-centered">
+        <form action="sent.html" id="form_{{ template }}" method="post" class="form-centered">
             <div class="input-group">
-                <input type="email" data-fv-emailaddress-message="The value is not a valid email address."
-                       class="form-control" placeholder="friend@email.com" name="email" required />
+                <input type="email"
+                       data-fv-emailaddress-message="The value is not a valid email address."
+                       class="form-control"
+                       placeholder="friend@email.com"
+                       name="email_{{ template }}"
+                       id="email_{{ template }}"
+                       required />
                 <span class="input-group-btn">
-                                <button class="btn btn-default" type="submit">Send</button>
-                            </span>
+                    <button class="btn btn-default"
+                            type="submit"
+                            name="submitButton_{{ template }}"
+                            id="submitButton_{{ template }}">
+                        Send
+                    </button>
+                </span>
             </div><!-- /input-group -->
-            <input type="hidden" name="template" value="{{ template }}" />
         </form>
     </div><!-- /.col-lg-4 -->
 </div><!-- /.row -->
+
+<script type='text/javascript'>
+    /* attach a submit handler to the form */
+    $("#form_{{ template }}").submit(function(event) {
+        /* stop form from submitting normally */
+        event.preventDefault();
+
+        $("#preloader").css('visibility', 'visible');
+        var $form = $( this );
+        var url = 'https://33dl7k0ccc.execute-api.eu-west-1.amazonaws.com/prod/intervention-ninja-email'
+        var email = $("#email_{{ template }}").val()
+        var template = "{{ template }}"
+
+        $.ajax({
+            type: 'POST',
+            url: url,
+            // The key needs to match your method's input parameter (case-sensitive).
+            data: JSON.stringify({email: email, template: template}),
+            contentType: "application/json; charset=utf-8",
+            crossDomain: true,
+            dataType: "json",
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log('An error occurred...');
+                console.log('jqXHR:');
+                console.log(jqXHR);
+                console.log('textStatus:');
+                console.log(textStatus);
+                console.log('errorThrown:');
+                console.log(errorThrown);
+                $("#preloader").css('visibility', 'hidden');
+                location.href = $form.attr('action')
+            },
+            /**
+             * A function to be called if the request succeeds.
+             */
+            success: function(data, textStatus, jqXHR) {
+                $("#preloader").css('visibility', 'hidden');
+                location.href = $form.attr('action')
+            }
+        })
+    });
+</script>
 
 {% endmacro %}
