@@ -1,0 +1,18 @@
+{% macro sent(title, subtitle) %}
+
+{% from 'macros/social_buttons.html' import social_buttons %}
+
+<!-- Header -->
+<header class="intro-sent">
+    <div class="container">
+        <div class="intro-message">
+            <h1>{{ title }}</h1><br />
+            <h2>{{ subtitle }}</h2>
+            <a class="btn btn-light btn-xl js-scroll-trigger" href="/">Let's send another</a>
+            <hr class="intro-divider">
+            {{ social_buttons() }}
+        </div>
+    </div>
+</header>
+
+{% endmacro %}

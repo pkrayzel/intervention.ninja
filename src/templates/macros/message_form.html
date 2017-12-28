@@ -28,41 +28,44 @@
 
 <script type='text/javascript'>
     /* attach a submit handler to the form */
+    API_ENDPOINT = 'https://33dl7k0ccc.execute-api.eu-west-1.amazonaws.com/prod/intervention-ninja-email'
+    URL_REDIRECT_SENT = 'sent.html'
+    URL_REDIRECT_SENT_GENERAL_ERROR = 'sent_general_error.html'
+    URL_REDIRECT_SENT_LIMIT_EXCEEDED = 'sent_limit_exceeded.html'
+
     $("#form_{{ template }}").submit(function(event) {
         /* stop form from submitting normally */
         event.preventDefault();
 
         $("#preloader").css('visibility', 'visible');
         var $form = $( this );
-        var url = 'https://33dl7k0ccc.execute-api.eu-west-1.amazonaws.com/prod/intervention-ninja-email'
         var email = $("#email_{{ template }}").val()
         var template = "{{ template }}"
 
         $.ajax({
             type: 'POST',
-            url: url,
-            // The key needs to match your method's input parameter (case-sensitive).
+            url: API_ENDPOINT,
             data: JSON.stringify({email: email, template: template}),
-            contentType: "application/json; charset=utf-8",
+            contentType: 'application/json; charset=utf-8',
             crossDomain: true,
-            dataType: "json",
-            error: function(jqXHR, textStatus, errorThrown) {
-                console.log('An error occurred...');
-                console.log('jqXHR:');
-                console.log(jqXHR);
-                console.log('textStatus:');
-                console.log(textStatus);
-                console.log('errorThrown:');
-                console.log(errorThrown);
+            dataType: 'json',
+            error: function(xhr, textStatus, errorThrown) {
                 $("#preloader").css('visibility', 'hidden');
-                location.href = $form.attr('action')
+                location.href = URL_REDIRECT_SENT_GENERAL_ERROR
             },
             /**
              * A function to be called if the request succeeds.
              */
-            success: function(data, textStatus, jqXHR) {
+            success: function(data, textStatus, xhr) {
                 $("#preloader").css('visibility', 'hidden');
-                location.href = $form.attr('action')
+                
+                if (data.status_code == 429) {
+                    location.href = URL_REDIRECT_SENT_LIMIT_EXCEEDED
+                } else if (data.status_code == 200) {
+                    location.href = URL_REDIRECT_SENT
+                } else {
+                    location.href = URL_REDIRECT_SENT_GENERAL_ERROR
+                }
             }
         })
     });

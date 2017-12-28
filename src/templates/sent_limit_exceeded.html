@@ -1,0 +1,7 @@
+{% extends "common/base.html" %}
+{% block page_content %}
+    {% from 'macros/sent.html' import sent %}
+    {{ sent("Wait a minute!", "You've exceeded a maximum amount of emails per minute.") }}
+{% endblock %}
+
+

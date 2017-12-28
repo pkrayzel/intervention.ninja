@@ -1,0 +1,7 @@
+{% extends "common/base.html" %}
+{% block page_content %}
+    {% from 'macros/sent.html' import sent %}
+    {{ sent("Ouch!", "Something went wrong... sorry!") }}
+{% endblock %}
+
+
