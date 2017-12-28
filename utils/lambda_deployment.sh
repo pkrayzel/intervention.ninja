@@ -8,4 +8,4 @@ cd dist && zip -r ../dist.zip . && cd ..
 
 aws s3 cp dist.zip s3://deploymentsupport/www.intervention.ninja/
 
-aws lambda update-function-code --profile private_developer --region eu-west-1 --function-name hello_world --s3-bucket deploymentsupport --s3-key www.intervention.ninja/dist.zip --publish
+aws lambda update-function-code --profile private_developer --region eu-west-1 --function-name intervention_ninja_mail_sender --s3-bucket deploymentsupport --s3-key www.intervention.ninja/dist.zip --publish
