@@ -10,4 +10,4 @@ if __name__ == '__main__':
 
     time.sleep(5)
 
-    # os.system('aws s3 cp build/ s3://www.intervention.ninja/ --recursive')
+    os.system('aws s3 cp build/ s3://www.intervention.ninja/ --recursive')
