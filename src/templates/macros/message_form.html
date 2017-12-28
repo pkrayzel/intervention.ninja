@@ -58,7 +58,6 @@
              */
             success: function(data, textStatus, xhr) {
                 $("#preloader").css('visibility', 'hidden');
-                
                 if (data.status_code == 429) {
                     location.href = URL_REDIRECT_SENT_LIMIT_EXCEEDED
                 } else if (data.status_code == 200) {
