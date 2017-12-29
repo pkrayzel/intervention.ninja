@@ -1,0 +1,158 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "AWS CloudFormation Template for project Intervention Ninja",
+  "Parameters" : {
+    "MailUsername": {
+      "Type": "String",
+      "Description" : "Mail username"
+    },
+    "MailPassword": {
+      "NoEcho": "true",
+      "Type": "String",
+      "Description" : "Mail password"
+    }
+  },
+  "Resources" : {
+    "InterventionNinjaEmailsTable": {
+      "Type" : "AWS::DynamoDB::Table",
+      "Properties" : {
+        "AttributeDefinitions" : [
+          {
+            "AttributeName" : "timestamp",
+            "AttributeType" : "N"
+          },
+          {
+            "AttributeName" : "email",
+            "AttributeType" : "S"
+          }
+        ],
+        "KeySchema" : [
+          {
+            "AttributeName" : "timestamp",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName" : "email",
+            "KeyType": "RANGE"
+          }
+        ],
+        "ProvisionedThroughput" : {
+          "ReadCapacityUnits" : "5",
+          "WriteCapacityUnits" : "5"
+        },
+        "TableName" : "intervention_ninja_emails"
+      }
+    },
+    "InterventionNinjaIPsTable": {
+      "Type" : "AWS::DynamoDB::Table",
+      "Properties" : {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "timestamp",
+            "AttributeType": "N"
+          },
+          {
+            "AttributeName": "ip_address",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "timestamp",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName": "ip_address",
+            "KeyType": "RANGE"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": "5",
+          "WriteCapacityUnits": "5"
+        },
+        "TableName": "intervention_ninja_ips"
+      }
+    },
+    "InterventionNinjaEmailSender": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "intervention_ninja.lambda_handler",
+        "Role": { "Fn::GetAtt" : ["InterventionNinjaLambdaExecutionRole", "Arn"] },
+        "Description": "Sends emails to users from intervention ninja",
+        "FunctionName": "intervention_ninja_email_sender",
+        "MemorySize": 128,
+        "Timeout": 30,
+        "Environment": {
+          "Variables": {
+            "MAIL_USERNAME": { "Ref": "MailUsername" },
+            "MAIL_PASSWORD": { "Ref": "MailPassword" }
+          }
+        },
+        "Code": {
+          "S3Bucket" : "deploymentsupport",
+          "S3Key" : "www.intervention.ninja/dist.zip"
+        },
+        "Runtime": "python3.6"
+      },
+      "DependsOn" : "InterventionNinjaLambdaExecutionRole"
+    },
+    "InterventionNinjaLambdaExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties":
+      {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal":
+              {
+                "Service": ["lambda.amazonaws.com"]
+              },
+              "Action": ["sts:AssumeRole"]
+            }
+          ]
+        },
+        "Path": "/serviceroles/",
+        "Policies": [
+          {
+            "PolicyName": "CloudWatchLogs",
+            "PolicyDocument":
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": "arn:aws:logs:*:*:*"
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "DynamoDBReadWriteAccess",
+            "PolicyDocument":
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:Scan"
+                  ],
+                  "Resource": "arn:aws:dynamodb:eu-west-1:166058053690:table/intervention_ninja*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}
