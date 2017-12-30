@@ -10,6 +10,16 @@
       "NoEcho": "true",
       "Type": "String",
       "Description" : "Mail password"
+    },
+    "CertificateArn": {
+      "Type": "String",
+      "Description" : "Certificate ARN in us-east region for edge-optimized domain with API Gateway",
+      "Default": "arn:aws:acm:us-east-1:166058053690:certificate/2383be67-00f8-493a-9668-a9d293d70ae8"
+    },
+    "HostedZoneId": {
+      "Type": "String",
+      "Description" : "HostedZoneId of the domain which will be prefixed with \"api.\" and routed to API Gateway",
+      "Default": "Z18KK2TQ1MWP99"
     }
   },
   "Resources" : {
@@ -43,6 +53,27 @@
         "CloudWatchRoleArn": {"Fn::GetAtt": ["ApiGatewayCloudWatchLogsRole", "Arn"] }
       }
     },
+    "ApiDomainName": {
+      "Type": "AWS::ApiGateway::DomainName",
+      "Properties": {
+        "CertificateArn": { "Ref": "CertificateArn" },
+        "DomainName": "api.intervention.ninja",
+        "EndpointConfiguration" : {
+          "Types" : ["EDGE"]
+        }
+      },
+      "DependsOn": ["ApiStage"]
+    },
+    "ApiBasePathMapping": {
+      "Type" : "AWS::ApiGateway::BasePathMapping",
+      "Properties" : {
+        "BasePath" : "v1",
+        "DomainName" : "api.intervention.ninja",
+        "RestApiId": {"Ref": "RestApi"},
+        "Stage" : "prod"
+      },
+      "DependsOn": ["ApiDomainName", "RestApi"]
+    },
     "ApiStage": {
       "DependsOn": ["ApiGatewayAccount"],
       "Type": "AWS::ApiGateway::Stage",
@@ -61,7 +92,7 @@
     },
     "ApiDeployment": {
       "Type": "AWS::ApiGateway::Deployment",
-      "DependsOn": ["InterventionNinjaEmailPOST", "InterventionNinjaEmailOPTIONS"],
+      "DependsOn": ["EmailsPOST", "EmailsOPTIONS"],
       "Properties": {
         "RestApiId": {"Ref": "RestApi"}
       }
@@ -73,15 +104,29 @@
         "Description": "Intervention Ninja Email Sender Rest API"
       }
     },
-    "InterventionNinjaEmailResource": {
+    "Route53RecordSetApi": {
+      "Type": "AWS::Route53::RecordSet",
+      "Properties": {
+        "Name" : "api.intervention.ninja",
+        "Type" : "A",
+        "HostedZoneId" : { "Ref": "HostedZoneId" },
+        "AliasTarget" : {
+          "DNSName" : { "Fn::GetAtt" : [ "ApiDomainName", "DistributionDomainName" ] },
+          "EvaluateTargetHealth" : false,
+          "HostedZoneId" : "Z2FDTNDATAQYW2" }
+        }
+      },
+      "DependsOn": ["ApiDomainName"]
+    },
+    "EmailsResource": {
       "Type": "AWS::ApiGateway::Resource",
       "Properties": {
         "RestApiId": {"Ref": "RestApi"},
         "ParentId": {"Fn::GetAtt": ["RestApi", "RootResourceId"]},
-        "PathPart": "intervention-ninja-email"
+        "PathPart": "emails"
       }
     },
-    "InterventionNinjaEmailPOST": {
+    "EmailsPOST": {
       "DependsOn": "LambdaPermission",
       "Type": "AWS::ApiGateway::Method",
       "Properties": {
@@ -150,10 +195,8 @@
             ]]}
           }
         },
-        "RequestParameters": {
-
-        },
-        "ResourceId": {"Ref": "InterventionNinjaEmailResource"},
+        "RequestParameters": {},
+        "ResourceId": {"Ref": "EmailsResource"},
         "RestApiId": {"Ref": "RestApi"},
         "MethodResponses": [{
           "ResponseModels": {
@@ -166,7 +209,7 @@
         }]
       }
     },
-    "InterventionNinjaEmailOPTIONS": {
+    "EmailsOPTIONS": {
       "DependsOn": "LambdaPermission",
       "Type": "AWS::ApiGateway::Method",
       "Properties": {
@@ -190,7 +233,7 @@
               "application/json": "{\"status_code\": 200}"
           }
         },
-        "ResourceId": {"Ref": "InterventionNinjaEmailResource"},
+        "ResourceId": {"Ref": "EmailsResource"},
         "RestApiId": {"Ref": "RestApi"},
         "MethodResponses": [{
           "ResponseModels": {
