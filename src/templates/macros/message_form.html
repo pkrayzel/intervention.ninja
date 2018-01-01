@@ -29,19 +29,19 @@
 <script type='text/javascript'>
     /* attach a submit handler to the form */
     API_ENDPOINT = 'https://api.intervention.ninja/v1/emails'
-    URL_REDIRECT_SENT = 'sent.html'
-    URL_REDIRECT_SENT_GENERAL_ERROR = 'sent_general_error.html'
-    URL_REDIRECT_SENT_LIMIT_EXCEEDED = 'sent_limit_exceeded.html'
+    prefix = 'https://www.intervention.ninja/'
+    URL_REDIRECT_SENT = 'sent.html';
+    URL_REDIRECT_SENT_GENERAL_ERROR = 'sent_general_error.html';
+    URL_REDIRECT_SENT_LIMIT_EXCEEDED = 'sent_limit_exceeded.html';
 
     $("#form_{{ template }}").submit(function(event) {
         /* stop form from submitting normally */
         event.preventDefault();
-
         $("#preloader").css('visibility', 'visible');
         var $form = $( this );
-        var email = $("#email_{{ template }}").val()
-        var template = "{{ template }}"
-
+        var email = $("#email_{{ template }}").val();
+        var template = "{{ template }}";
+        var redirect_url = URL_REDIRECT_SENT;
         $.ajax({
             type: 'POST',
             url: API_ENDPOINT,
@@ -51,7 +51,7 @@
             dataType: 'json',
             error: function(xhr, textStatus, errorThrown) {
                 $("#preloader").css('visibility', 'hidden');
-                location.href = URL_REDIRECT_SENT_GENERAL_ERROR
+                redirect_url = URL_REDIRECT_SENT_GENERAL_ERROR;
             },
             /**
              * A function to be called if the request succeeds.
@@ -59,15 +59,15 @@
             success: function(data, textStatus, xhr) {
                 $("#preloader").css('visibility', 'hidden');
                 if (data.status_code == 429) {
-                    location.href = URL_REDIRECT_SENT_LIMIT_EXCEEDED
-                } else if (data.status_code == 200) {
-                    location.href = URL_REDIRECT_SENT
-                } else {
-                    location.href = URL_REDIRECT_SENT_GENERAL_ERROR
+                    redirect_url = URL_REDIRECT_SENT_LIMIT_EXCEEDED;
+                } else if (data.status_code != 200) {
+                    redirect_url = URL_REDIRECT_SENT_GENERAL_ERROR;
                 }
             }
-        })
+        });
+        window.location.replace(redirect_url);
     });
+
 </script>
 
 {% endmacro %}

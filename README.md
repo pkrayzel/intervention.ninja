@@ -1,46 +1,25 @@
-API endpoint:
-
-https://j5fn6skeh5.execute-api.eu-west-1.amazonaws.com/prod/intervention-ninja-lambda
-
 # intervention.ninja
 
 The purpose of this project is to help people deal with difficult announcements to their friends / coworkers.
 
-It uses flask micro-framework. 
+It uses multiple AWS resources.  
 
-## Running it in docker
+## Architecture overview
 
-``` 
-docker build -t pkrayzel/intervention-ninja .
-docker run -p 5000:5000 -d --env MAIL_USERNAME=username --env MAIL_PASSWORD=password -t pkrayzel/intervention-ninja  
-```
+TBD
 
-## Running it locally outside docker
+## Deployment
 
-#### Create virtual environment
-```
-virtualenv ~/int -p python3
-``` 
 
-#### Activate it
-```
-source ~/int/bin/activate
-```
+0) Prerequisies
+    * already created AWS HostedZone with working name servers for the domain name and your domain register
+    * terminal session with environment variables (KEY, TOKEN, ...) to work with AWS through aws cli (TBD how to)
 
-#### Install all dependencies
-```
-pip install -r requirements.txt
-```
+1) Deploy CloudFormation stack https://github.com/pkrayzel/aws-static-site/blob/master/static_site.json
+    * <strong>AcmCertificateArn</strong> -> ARN of your certificate in AWS Certificate Manager (in our case for domain names www.intervention.ninja, *.intervention.ninja and intervention.ninja)
+    * <strong>DomainName</strong> -> intervention.ninja   
+ 
+2) Run <strong>python deploy.py</strong> script from utils directory to deploy static content to target bucket
+    
 
-#### Configure gmail smtp server
-
-``` 
-export MAIL_USERNAME=username
-export MAIL_PASSWORD=password
-```
-
-#### Run it
-``` 
-cd src
-python app.py
-```
+3) Deploy CloudFormation stack intervention_ninja.json

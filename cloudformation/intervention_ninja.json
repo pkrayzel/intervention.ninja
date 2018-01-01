@@ -14,7 +14,7 @@
     "CertificateArn": {
       "Type": "String",
       "Description" : "Certificate ARN in us-east region for edge-optimized domain with API Gateway",
-      "Default": "arn:aws:acm:us-east-1:166058053690:certificate/2383be67-00f8-493a-9668-a9d293d70ae8"
+      "Default": "arn:aws:acm:us-east-1:166058053690:certificate/6d58bf91-665c-4624-b514-667ae88f805d"
     },
     "HostedZoneId": {
       "Type": "String",
@@ -113,7 +113,7 @@
         "AliasTarget" : {
           "DNSName" : { "Fn::GetAtt" : [ "ApiDomainName", "DistributionDomainName" ] },
           "EvaluateTargetHealth" : false,
-          "HostedZoneId" : "Z2FDTNDATAQYW2" }
+          "HostedZoneId" : "Z2FDTNDATAQYW2"
         }
       },
       "DependsOn": ["ApiDomainName"]
