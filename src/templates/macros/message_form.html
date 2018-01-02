@@ -4,7 +4,7 @@
 <h3>Tell him / her! Anonymously.</h3>
 <div class="row">
     <div class="form">
-        <form action="sent.html" id="form_{{ template }}" method="GET" class="form-centered">
+        <form action="sent.html" id="form_{{ template }}" method="POST" class="form-centered">
             <div class="input-group">
                 <input type="email"
                        data-fv-emailaddress-message="The value is not a valid email address."
@@ -16,8 +16,8 @@
                 <span class="input-group-btn">
                     <button class="btn btn-default"
                             type="submit"
-                            name="submitButton_{{ template }}"
-                            id="submitButton_{{ template }}">
+                            name="button_{{ template }}"
+                            id="button_{{ template }}">
                         Send
                     </button>
                 </span>
@@ -27,46 +27,42 @@
 </div><!-- /.row -->
 
 <script type='text/javascript'>
-    /* attach a submit handler to the form */
     API_ENDPOINT = 'https://api.intervention.ninja/v1/emails'
     URL_REDIRECT_SENT = 'sent.html';
     URL_REDIRECT_SENT_GENERAL_ERROR = 'sent_general_error.html';
     URL_REDIRECT_SENT_LIMIT_EXCEEDED = 'sent_limit_exceeded.html';
 
-    $("#form_{{ template }}").submit(function(event) {
-        /* stop form from submitting normally */
-        event.preventDefault();
-        $("#preloader").css('visibility', 'visible');
-        var email = $("#email_{{ template }}").val();
-        var template = "{{ template }}";
+    $(function () {
+        $("#form_{{ template }}").submit(function(event){
+            event.preventDefault()
+            $("#preloader").css('visibility', 'visible');
+            var email = $("#email_{{ template }}").val();
+            var template = "{{ template }}";
 
-        $.ajax({
-            type: 'POST',
-            url: API_ENDPOINT,
-            data: JSON.stringify({email: email, template: template}),
-            contentType: 'application/json; charset=utf-8',
-            crossDomain: true,
-            dataType: 'json',
-            error: function(xhr, textStatus, errorThrown) {
-                $("#preloader").css('visibility', 'hidden');
-                window.location = URL_REDIRECT_SENT_GENERAL_ERROR;
-            },
-            /**
-             * A function to be called if the request succeeds.
-             */
-            success: function(data, textStatus, xhr) {
-                $("#preloader").css('visibility', 'hidden');
-                if (data.status_code == 429) {
-                    window.location = URL_REDIRECT_SENT_LIMIT_EXCEEDED;
-                } else if (data.status_code != 200) {
+            $.ajax({
+                type: 'POST',
+                url: API_ENDPOINT,
+                data: JSON.stringify({email: email, template: template}),
+                contentType: 'application/json; charset=utf-8',
+                crossDomain: true,
+                dataType: 'json',
+                error: function(xhr, textStatus, errorThrown) {
+                    $("#preloader").css('visibility', 'hidden');
                     window.location = URL_REDIRECT_SENT_GENERAL_ERROR;
-                } else {
-                    window.location = URL_REDIRECT_SENT;
+                },
+                success: function(data, textStatus, xhr) {
+                    $("#preloader").css('visibility', 'hidden');
+                    if (data.status_code == 429) {
+                        window.location = URL_REDIRECT_SENT_LIMIT_EXCEEDED;
+                    } else if (data.status_code != 200) {
+                        window.location = URL_REDIRECT_SENT_GENERAL_ERROR;
+                    } else {
+                        window.location = URL_REDIRECT_SENT;
+                    }
                 }
-            }
+            });
         });
     });
-
 </script>
 
 {% endmacro %}

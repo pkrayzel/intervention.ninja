@@ -21,5 +21,7 @@ TBD
  
 2) Run <strong>python deploy.py</strong> script from utils directory to deploy static content to target bucket
     
+python deploy.py --domain-name intervention.ninja --regenerate R --invalidate-file-names /index.html,/sent.html
+    
 
 3) Deploy CloudFormation stack intervention_ninja.json
