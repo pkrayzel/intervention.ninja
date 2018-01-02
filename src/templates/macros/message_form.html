@@ -4,7 +4,7 @@
 <h3>Tell him / her! Anonymously.</h3>
 <div class="row">
     <div class="form">
-        <form action="sent.html" id="form_{{ template }}" method="post" class="form-centered">
+        <form action="sent.html" id="form_{{ template }}" method="GET" class="form-centered">
             <div class="input-group">
                 <input type="email"
                        data-fv-emailaddress-message="The value is not a valid email address."
@@ -29,7 +29,6 @@
 <script type='text/javascript'>
     /* attach a submit handler to the form */
     API_ENDPOINT = 'https://api.intervention.ninja/v1/emails'
-    prefix = 'https://www.intervention.ninja/'
     URL_REDIRECT_SENT = 'sent.html';
     URL_REDIRECT_SENT_GENERAL_ERROR = 'sent_general_error.html';
     URL_REDIRECT_SENT_LIMIT_EXCEEDED = 'sent_limit_exceeded.html';
@@ -38,10 +37,9 @@
         /* stop form from submitting normally */
         event.preventDefault();
         $("#preloader").css('visibility', 'visible');
-        var $form = $( this );
         var email = $("#email_{{ template }}").val();
         var template = "{{ template }}";
-        var redirect_url = URL_REDIRECT_SENT;
+
         $.ajax({
             type: 'POST',
             url: API_ENDPOINT,
@@ -51,7 +49,7 @@
             dataType: 'json',
             error: function(xhr, textStatus, errorThrown) {
                 $("#preloader").css('visibility', 'hidden');
-                redirect_url = URL_REDIRECT_SENT_GENERAL_ERROR;
+                window.location = URL_REDIRECT_SENT_GENERAL_ERROR;
             },
             /**
              * A function to be called if the request succeeds.
@@ -59,13 +57,14 @@
             success: function(data, textStatus, xhr) {
                 $("#preloader").css('visibility', 'hidden');
                 if (data.status_code == 429) {
-                    redirect_url = URL_REDIRECT_SENT_LIMIT_EXCEEDED;
+                    window.location = URL_REDIRECT_SENT_LIMIT_EXCEEDED;
                 } else if (data.status_code != 200) {
-                    redirect_url = URL_REDIRECT_SENT_GENERAL_ERROR;
+                    window.location = URL_REDIRECT_SENT_GENERAL_ERROR;
+                } else {
+                    window.location = URL_REDIRECT_SENT;
                 }
             }
         });
-        window.location.replace(redirect_url);
     });
 
 </script>

@@ -230,7 +230,7 @@
           }],
           "PassthroughBehavior": "WHEN_NO_TEMPLATES",
           "RequestTemplates": {
-              "application/json": "{\"status_code\": 200}"
+              "application/json": "{\"statusCode\": 200}"
           }
         },
         "ResourceId": {"Ref": "EmailsResource"},
