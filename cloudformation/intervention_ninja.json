@@ -273,12 +273,12 @@
           }
         },
         "Code": {
-          "S3Bucket" : "deploymentsupport",
-          "S3Key" : "www.intervention.ninja/dist.zip"
+          "S3Bucket" : "intervention-ninja-deployment-support",
+          "S3Key" : "lambda_dist.zip"
         },
         "Runtime": "python3.6"
       },
-      "DependsOn" : "InterventionNinjaLambdaExecutionRole"
+      "DependsOn" : ["InterventionNinjaLambdaExecutionRole"]
     },
     "InterventionNinjaLambdaExecutionRole": {
       "Type": "AWS::IAM::Role",
@@ -330,7 +330,9 @@
                     "dynamodb:PutItem",
                     "dynamodb:Scan"
                   ],
-                  "Resource": "arn:aws:dynamodb:eu-west-1:166058053690:table/intervention_ninja*"
+                  "Resource": {"Fn::Join": ["",
+                    ["arn:aws:dynamodb:", {"Ref": "AWS::Region"}, ":166058053690:table/intervention_ninja*"]
+                  ]}
                 }
               ]
             }

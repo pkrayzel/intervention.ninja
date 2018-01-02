@@ -1,0 +1,12 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "AWS CloudFormation Template for project Intervention Ninja deployment support",
+  "Resources" : {
+    "DeploymentSupportBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": "intervention-ninja-deployment-support"
+      }
+    }
+  }
+}

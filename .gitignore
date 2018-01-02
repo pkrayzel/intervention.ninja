@@ -10,6 +10,7 @@ utils/build
 utils/build/*
 utils/dist
 utils/dist.zip
+utils/lambda_dist.zip
 
 log.txt
 
