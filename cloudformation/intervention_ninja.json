@@ -335,6 +335,24 @@
                 }
               ]
             }
+          },
+          {
+            "PolicyName": "SNSPublishAccess",
+            "PolicyDocument":
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "SNS:Publish"
+                  ],
+                  "Resource": {"Fn::Join": ["",
+                    ["arn:aws:sns:", {"Ref": "AWS::Region"}, ":", {"Ref": "AWS::AccountId"}, ":intervention-ninja-*"]
+                  ]}
+                }
+              ]
+            }
           }
         ]
       }
