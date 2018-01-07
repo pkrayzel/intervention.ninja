@@ -1,14 +1,10 @@
-from services.mail import MailService
-from services.template import TemplateServiceS3
 from services import dao
+from services import notification
 import logging
 import json
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-
-mail = MailService()
-mail_template_service = TemplateServiceS3('www.intervention.ninja', 'emails/')
+KEY_BODY = 'body'
+KEY_CONTEXT = 'context'
 
 KEY_EMAIL = 'email'
 KEY_TEMPLATE = 'template'
@@ -20,8 +16,24 @@ MAX_EMAILS_PER_EMAIL_PER_MINUTE = 1
 
 MILLISECONDS_PER_MINUTE = 60 * 1000
 
-MAIL_SUBJECT = 'Intervention Ninja - personal message'
-MAIL_SENDER = 'intervention.ninja@gmail.com'
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+
+def lambda_handler(event, context):
+    try:
+        logger.info("intervention_ninja - lambda_handler event: {} context {}"
+                    .format(json.dumps(event, indent=2), context))
+
+        body = event if KEY_BODY not in event else event[KEY_BODY]
+        context_body = event if KEY_CONTEXT not in event else event[KEY_CONTEXT]
+
+        logger.info('body: {}, context_body: {}'.format(body, context_body))
+
+        return validate_send_email(body, context_body)
+    except Exception as e:
+        logger.error('Exception during sending email: %s', e)
+        return construct_response_server_error()
 
 
 def validate_send_email(body, context):
@@ -62,12 +74,14 @@ def validate_send_email(body, context):
                        .format(email, count))
         return construct_response_limit_exceeded("Limit of requests for single email per minute exceeded.")
 
-    content_html = mail_template_service.render_template('{}.html'.format(template))
-
-    mail.send_mail(MAIL_SUBJECT, MAIL_SENDER, email, content_html)
-
+    # store sender info + receiver email to dynamo (limit purposes)
     dao.store_ip_address(source_ip)
     dao.store_email(email, template)
+
+    # publish to sns topic
+    notification.publish(email, template)
+
+    # return success response
     return _construct_response_success()
 
 
@@ -106,3 +120,4 @@ def _construct_response_success(response_body=None):
     }
     logger.info('constructing success response - {}'.format(result))
     return result
+
