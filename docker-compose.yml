@@ -1,7 +1,13 @@
 version: '2.1'
 services:
   localstack:
-    image: atlassianlabs/localstack
+    image: localstack/localstack
+    ports:
+      - "4564-4583:4564-4583"
+      - "8080:8080"
 
   mail:
     image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"

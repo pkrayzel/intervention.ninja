@@ -1,41 +1,27 @@
-import emails
+import boto3
 import logging
-import os
 
-logger = logging.getLogger()
+logging.basicConfig()
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-# http://python-emails.readthedocs.io/en/latest/
+client = boto3.client('ses')
 
 
-class MailService:
-    def __init__(self):
-        self._smtp = None
+def send_email(email, template):
+    logger.info(f'sending a templated email through SES to: {email}')
 
-    def send_mail(self, subject, sender, recipient, body_html):
-        try:
-            message = emails.html(html=body_html,
-                                  subject=subject,
-                                  mail_from=(sender, sender))
+    ses_template = f'intervention-ninja-{template}'
+    logger.info(f'SES template name to use: {ses_template}')
 
-            logger.debug(f'Sending html email to recipient: {recipient}')
-
-            result = message.send(to=(recipient, recipient), smtp=self._get_smtp())
-
-            return result.status_code == 250
-        except Exception as exception:
-            logger.error('Sending email failed with exception: %s', exception)
-            return False
-
-    def _get_smtp(self):
-        if self._smtp is None:
-            self._smtp = {
-                'host': 'smtp.gmail.com',
-                'port': 465,
-                'ssl': True,
-                'tls': False,
-                'user': os.environ.get('MAIL_USERNAME'),
-                'password': os.environ.get('MAIL_PASSWORD')
-            }
-
-        return self._smtp
+    response = client.send_templated_email(
+        Source='no-reply@intervention.ninja',
+        Destination={
+            'ToAddresses': [
+                email,
+            ]
+        },
+        Template=ses_template,
+        TemplateData="{}"
+    )
+    logger.info(f'SES response: {response}')

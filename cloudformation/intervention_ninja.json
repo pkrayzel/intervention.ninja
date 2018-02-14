@@ -2,15 +2,6 @@
   "AWSTemplateFormatVersion" : "2010-09-09",
   "Description" : "AWS CloudFormation Template for project Intervention Ninja",
   "Parameters" : {
-    "MailUsername": {
-      "Type": "String",
-      "Description" : "Mail username"
-    },
-    "MailPassword": {
-      "NoEcho": "true",
-      "Type": "String",
-      "Description" : "Mail password"
-    },
     "CertificateArn": {
       "Type": "String",
       "Description" : "Certificate ARN in us-east region for edge-optimized domain with API Gateway",
@@ -373,12 +364,6 @@
         "FunctionName": "intervention-ninja-email-sender",
         "MemorySize": 128,
         "Timeout": 30,
-        "Environment": {
-          "Variables": {
-            "MAIL_USERNAME": { "Ref": "MailUsername" },
-            "MAIL_PASSWORD": { "Ref": "MailPassword" }
-          }
-        },
         "Code": {
           "S3Bucket" : "intervention-ninja-deployment-support",
           "S3Key" : "lambda_email_sender.zip"

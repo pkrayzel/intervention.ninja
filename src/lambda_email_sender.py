@@ -1,5 +1,4 @@
-from services.mail import MailService
-from services.template import TemplateServiceS3
+from services import mail
 import logging
 import json
 from aws_xray_sdk.core import xray_recorder
@@ -7,12 +6,6 @@ from aws_xray_sdk.core import patch_all
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-mail = MailService()
-mail_template_service = TemplateServiceS3('www.intervention.ninja', 'emails/')
-
-MAIL_SUBJECT = 'Intervention Ninja - personal message'
-MAIL_SENDER = 'intervention.ninja@gmail.com'
 
 patch_all()
 
@@ -32,17 +25,8 @@ def lambda_handler(event, context):
         template = message['template']
         email = message['email']
 
-        xray_recorder.begin_subsegment(f'render_template_{i+1}')
-
-        content_html = mail_template_service.render_template(f'{template}.html')
-        logger.info(f'Template {template} successfully rendered')
-
-        xray_recorder.end_subsegment()
-        xray_recorder.begin_subsegment(f'send_email_{i+1}')
-
-        mail.send_mail(MAIL_SUBJECT, MAIL_SENDER, email, content_html)
+        mail.send_email(email, template)
 
         logger.info(f'Email with template {template} has been successfully sent to address: {email}')
-        xray_recorder.end_subsegment()
 
     xray_recorder.end_segment()
