@@ -73,7 +73,7 @@ def validate_send_email(body, context):
     logger.info(f'Comparing timestamp: {timestamp_minute_before} with current values in DynamoDB to check limits.')
 
     # check whether from given ip address hasn't been sent email in last 1 minute
-    ip_item, email_item = dao_batch.get_counts(email, source_ip)
+    ip_item, email_item = dao_batch.get_items(email, source_ip)
 
     if ip_item is not None and ip_item['timestamp'] >= timestamp_minute_before:
         logger.warning(f'Maximum emails from IP: {source_ip} per minute achieved.')
