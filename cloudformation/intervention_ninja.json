@@ -325,9 +325,8 @@
                 {
                   "Effect": "Allow",
                   "Action": [
-                    "dynamodb:GetItem",
-                    "dynamodb:PutItem",
-                    "dynamodb:Scan"
+                    "dynamodb:BatchWriteItem",
+                    "dynamodb:BatchGetItem"
                   ],
                   "Resource": {"Fn::Join": ["",
                     ["arn:aws:dynamodb:", {"Ref": "AWS::Region"}, ":", {"Ref": "AWS::AccountId"}, ":table/intervention_ninja*"]
@@ -443,29 +442,21 @@
       "Properties" : {
         "AttributeDefinitions" : [
           {
-            "AttributeName" : "timestamp",
-            "AttributeType" : "N"
-          },
-          {
             "AttributeName" : "email",
             "AttributeType" : "S"
           }
         ],
         "KeySchema" : [
           {
-            "AttributeName" : "timestamp",
-            "KeyType": "HASH"
-          },
-          {
             "AttributeName" : "email",
-            "KeyType": "RANGE"
+            "KeyType": "HASH"
           }
         ],
         "ProvisionedThroughput" : {
           "ReadCapacityUnits" : "5",
           "WriteCapacityUnits" : "5"
         },
-        "TableName" : "intervention_ninja_emails"
+        "TableName" : "intervention_ninja_emails_cache"
       }
     },
     "InterventionNinjaIPsTable": {
@@ -473,29 +464,21 @@
       "Properties" : {
         "AttributeDefinitions": [
           {
-            "AttributeName": "timestamp",
-            "AttributeType": "N"
-          },
-          {
             "AttributeName": "ip_address",
             "AttributeType": "S"
           }
         ],
         "KeySchema": [
           {
-            "AttributeName": "timestamp",
-            "KeyType": "HASH"
-          },
-          {
             "AttributeName": "ip_address",
-            "KeyType": "RANGE"
+            "KeyType": "HASH"
           }
         ],
         "ProvisionedThroughput": {
           "ReadCapacityUnits": "5",
           "WriteCapacityUnits": "5"
         },
-        "TableName": "intervention_ninja_ips"
+        "TableName": "intervention_ninja_ips_cache"
       }
     }
   }

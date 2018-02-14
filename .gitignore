@@ -13,6 +13,7 @@ utils/dist.zip
 utils/lambda_dist.zip
 utils/email-sender/
 utils/sns-publisher/
+utils/*.zip
 
 log.txt
 
