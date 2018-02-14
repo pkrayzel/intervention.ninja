@@ -26,14 +26,3 @@ def sent_general_error():
 @app.route('/sent_limit_exceeded.html')
 def sent_limit_exceeded():
     return render_template('sent_limit_exceeded.html')
-
-
-@app.route('/emails/smell.html')
-def email_smell():
-    return render_template('emails/smell.html')
-
-
-@app.route('/emails/drink.html')
-def email_drink():
-    return render_template('emails/drink.html')
-
