@@ -15,7 +15,7 @@ patch_all()
 
 
 def lambda_handler(event, context):
-    xray_recorder.begin_segment('intervention.ninja')
+    xray_recorder.begin_segment('intervention.ninja.sns.publisher')
     try:
         logger.info('Intervention Ninja - starting lambda function...')
 

@@ -1,0 +1,9 @@
+{
+  "Records": [
+    {
+      "Sns": {
+        "Message": "{\"template\": \"smell\", \"email\": \"pkrayzel@gmail.com\"}"
+      }
+    }
+  ]
+}

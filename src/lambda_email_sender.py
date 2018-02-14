@@ -18,6 +18,8 @@ patch_all()
 
 
 def lambda_handler(event, context):
+    xray_recorder.begin_segment('intervention.ninja.email.sender')
+
     logger.info(f'lambda handler event: {event}')
     records = event['Records']
 
@@ -35,9 +37,12 @@ def lambda_handler(event, context):
         content_html = mail_template_service.render_template(f'{template}.html')
         logger.info(f'Template {template} successfully rendered')
 
-        xray_recorder.end_segment()
+        xray_recorder.end_subsegment()
         xray_recorder.begin_subsegment(f'send_email_{i+1}')
 
         mail.send_mail(MAIL_SUBJECT, MAIL_SENDER, email, content_html)
 
         logger.info(f'Email with template {template} has been successfully sent to address: {email}')
+        xray_recorder.end_subsegment()
+
+    xray_recorder.end_segment()
