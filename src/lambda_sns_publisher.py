@@ -15,8 +15,9 @@ patch_all()
 
 
 def lambda_handler(event, context):
+    xray_recorder.begin_segment('intervention.ninja')
     try:
-        logger.info('intervention_ninja - lambda_handler')
+        logger.info('Intervention Ninja - starting lambda function...')
 
         body = event if constants.KEY_BODY not in event else event[constants.KEY_BODY]
         context_body = event if constants.KEY_CONTEXT not in event else event[constants.KEY_CONTEXT]
@@ -34,10 +35,11 @@ def lambda_handler(event, context):
 
         update_limits(arguments)
         send_email(arguments)
-
+        xray_recorder.end_segment()
         return response.construct_response_success()
     except Exception as e:
         logger.error('Exception during sending email: %s', e)
+        xray_recorder.end_segment()
         return response.construct_response_server_error()
 
 
@@ -85,13 +87,15 @@ def check_limits(arguments):
     ip_item, email_item = dao.get_items(arguments.email, arguments.source_ip_address)
 
     if ip_item is not None and ip_item['timestamp'] >= timestamp:
-        logger.warning(f'Maximum emails from IP: {arguments.source_ip} per minute achieved.')
-        return False, construct_response_limit_exceeded("Limit of requests from IP address per minute exceeded.")
+        logger.warning(f'Maximum emails from IP: {arguments.source_ip_address} per minute achieved.')
+        return False, response.construct_response_limit_exceeded(
+            "Limit of requests from IP address per minute exceeded.")
 
     # check whether from given ip address hasn't been sent email in last 1 minute
     if email_item is not None and email_item['timestamp'] >= timestamp:
         logger.warning(f'Maximum emails {arguments.email} per minute achieved.')
-        return False, construct_response_limit_exceeded("Limit of requests for single email per minute exceeded.")
+        return False, response.construct_response_limit_exceeded(
+            "Limit of requests for single email per minute exceeded.")
 
     logger.info('Both limits checked. All good to continue.')
     return True, None
@@ -100,7 +104,7 @@ def check_limits(arguments):
 @xray_recorder.capture('store_values_for_limits')
 def update_limits(arguments):
     logger.info('Updating DynamoDB to store values for new limits')
-    dao.store_items(arguments.email, arguments.template, arguments.source_ip)
+    dao.store_items(arguments.email, arguments.template, arguments.source_ip_address)
     logger.info('Successfully stored new limits to DynamoDB.')
 
 

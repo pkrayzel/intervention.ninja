@@ -7,7 +7,6 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 client_dynamo = boto3.client('dynamodb')
-resource_dynamo = boto3.resource('dynamodb')
 
 TABLE_NAME_EMAILS = 'intervention_ninja_emails_cache'
 TABLE_NAME_IP_ADDRESSES = 'intervention_ninja_ips_cache'

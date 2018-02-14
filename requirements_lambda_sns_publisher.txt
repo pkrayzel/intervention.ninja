@@ -1,2 +1,2 @@
-boto3==1.4.4
+boto3==1.5.28
 aws-xray-sdk==0.95
