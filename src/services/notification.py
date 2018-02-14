@@ -20,4 +20,4 @@ def publish(email, template):
     )
 
     message_id = response['MessageId']
-    logger.info('message_id: {}'.format(message_id))
+    logger.info(f'message successfully sent with message id: {message_id}')

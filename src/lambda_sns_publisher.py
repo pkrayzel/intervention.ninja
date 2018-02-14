@@ -1,25 +1,12 @@
-from services import dao_batch
-from services import notification
+from services import dao, notification
+from model.arguments import Arguments
+import constants
+from utils import time, response
+
 import logging
-import json
+
 from aws_xray_sdk.core import xray_recorder
 from aws_xray_sdk.core import patch_all
-from datetime import datetime
-import time
-
-
-KEY_BODY = 'body'
-KEY_CONTEXT = 'context'
-
-KEY_EMAIL = 'email'
-KEY_TEMPLATE = 'template'
-KEY_SOURCE_IP = 'source-ip'
-SUPPORTED_TEMPLATES = ['drink', 'smell']
-
-MAX_EMAILS_PER_IP_PER_MINUTE = 1
-MAX_EMAILS_PER_EMAIL_PER_MINUTE = 1
-
-MILLISECONDS_PER_MINUTE = 60 * 1000
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -31,116 +18,94 @@ def lambda_handler(event, context):
     try:
         logger.info('intervention_ninja - lambda_handler')
 
-        body = event if KEY_BODY not in event else event[KEY_BODY]
-        context_body = event if KEY_CONTEXT not in event else event[KEY_CONTEXT]
+        body = event if constants.KEY_BODY not in event else event[constants.KEY_BODY]
+        context_body = event if constants.KEY_CONTEXT not in event else event[constants.KEY_CONTEXT]
 
-        return validate_send_email(body, context_body)
+        validation_result, error_response, arguments \
+            = validate_input_arguments(body, context_body)
+
+        if not validation_result:
+            return error_response
+
+        within_limit, error_response = check_limits(arguments)
+
+        if not within_limit:
+            return error_response
+
+        update_limits(arguments)
+        send_email(arguments)
+
+        return response.construct_response_success()
     except Exception as e:
         logger.error('Exception during sending email: %s', e)
-        return construct_response_server_error()
+        return response.construct_response_server_error()
 
 
-@xray_recorder.capture('validate_send_email')
-def validate_send_email(body, context):
-    xray_recorder.begin_subsegment('argument_validation')
+@xray_recorder.capture('argument_validation')
+def validate_input_arguments(body, context):
+    """
+    :param body: body of the message, should contain email and template parameter
+    :param context: should contain source ip address
+    :return: tuple of validation success (True/False), error result (None if success is True,
+    otherwise contains constructed error response), arguments class if success is True, otherwise None
+    """
+    logger.info('Validating input arguments...')
 
-    if KEY_EMAIL not in body:
-        logger.warning(f'Missing required parameter: {KEY_EMAIL}')
-        return construct_response_bad_request()
-    elif KEY_TEMPLATE not in body:
-        logger.warning(f'Missing required parameter: {KEY_TEMPLATE}')
-        return construct_response_bad_request()
-    elif KEY_SOURCE_IP not in context:
-        logger.warning(f'Missing required parameter: {KEY_SOURCE_IP}')
-        return construct_response_bad_request()
+    if constants.KEY_EMAIL not in body \
+            or constants.KEY_TEMPLATE not in body \
+            or constants.KEY_SOURCE_IP not in context:
+        logger.warning('One of the required paramaters is missing')
+        return False, response.construct_response_bad_request(), None
 
-    email = body[KEY_EMAIL]
-    template = body[KEY_TEMPLATE]
-    source_ip = context[KEY_SOURCE_IP]
+    email = body[constants.KEY_EMAIL]
+    template = body[constants.KEY_TEMPLATE]
+    source_ip = context[constants.KEY_SOURCE_IP]
 
-    if template not in SUPPORTED_TEMPLATES:
+    if template not in constants.SUPPORTED_TEMPLATES:
         logger.warning(f'Template is not supported: {template}. Should be one of: {SUPPORTED_TEMPLATES}')
-        return construct_response_bad_request("Given template value is not supported.")
+        return False, response.construct_response_bad_request("Given template value is not supported."), None
 
     logger.info(f'Validation succeeded! '
                 f'Email: {email}, template: {template}, source_ip: {source_ip}')
+    return True, None, Arguments(email, template, source_ip)
 
-    xray_recorder.end_subsegment()
-    xray_recorder.begin_subsegment('ip_address_limit_check')
 
-    timestamp_minute_before = int(time.mktime(datetime.now().timetuple())) * 1000 - MILLISECONDS_PER_MINUTE
+@xray_recorder.capture('check_limits')
+def check_limits(arguments):
+    """
+    :param arguments: arguments class with input fields from the original event
+    :return: tuple of limit_exceeded (True / False), error_response (when limit exceeded is True, otherwise None)
+    """
+    logger.info('Checking for exceeding limits of the service.')
+    timestamp = time.get_timestamp_minute_ago()
 
-    logger.info(f'Comparing timestamp: {timestamp_minute_before} with current values in DynamoDB to check limits.')
-
-    # check whether from given ip address hasn't been sent email in last 1 minute
-    ip_item, email_item = dao_batch.get_items(email, source_ip)
-
-    if ip_item is not None and ip_item['timestamp'] >= timestamp_minute_before:
-        logger.warning(f'Maximum emails from IP: {source_ip} per minute achieved.')
-        return construct_response_limit_exceeded("Limit of requests from IP address per minute exceeded.")
-
-    xray_recorder.end_subsegment()
-    xray_recorder.begin_subsegment('email_limit_check')
+    logger.info(f'Comparing timestamp: {timestamp} with current values in DynamoDB to check limits.')
 
     # check whether from given ip address hasn't been sent email in last 1 minute
-    if email_item is not None and email_item['timestamp'] >= timestamp_minute_before:
-        logger.warning(f'Maximum emails {email} per minute achieved.')
-        return construct_response_limit_exceeded("Limit of requests for single email per minute exceeded.")
+    ip_item, email_item = dao.get_items(arguments.email, arguments.source_ip_address)
+
+    if ip_item is not None and ip_item['timestamp'] >= timestamp:
+        logger.warning(f'Maximum emails from IP: {arguments.source_ip} per minute achieved.')
+        return False, construct_response_limit_exceeded("Limit of requests from IP address per minute exceeded.")
+
+    # check whether from given ip address hasn't been sent email in last 1 minute
+    if email_item is not None and email_item['timestamp'] >= timestamp:
+        logger.warning(f'Maximum emails {arguments.email} per minute achieved.')
+        return False, construct_response_limit_exceeded("Limit of requests for single email per minute exceeded.")
 
     logger.info('Both limits checked. All good to continue.')
+    return True, None
 
-    xray_recorder.end_subsegment()
-    xray_recorder.begin_subsegment('store_values')
 
-    # store sender info + receiver email to dynamo (limit purposes)
-    dao_batch.store_items(email, template, source_ip)
+@xray_recorder.capture('store_values_for_limits')
+def update_limits(arguments):
+    logger.info('Updating DynamoDB to store values for new limits')
+    dao.store_items(arguments.email, arguments.template, arguments.source_ip)
     logger.info('Successfully stored new limits to DynamoDB.')
 
-    xray_recorder.end_subsegment()
 
-    xray_recorder.begin_subsegment('sns_publish')
+@xray_recorder.capture('sns_publish')
+def send_email(arguments):
     # publish to sns topic
-    notification.publish(email, template)
+    notification.publish(arguments.email, arguments.template)
     logger.info('Successfully published message to SNS.')
-    xray_recorder.end_subsegment()
-
-    # return success response
-    return _construct_response_success()
-
-
-def construct_response_bad_request(
-        message="Bad request. All required input parameters should be provided."):
-    return _construct_response_error(400, message, "BadRequest")
-
-
-def construct_response_limit_exceeded(message):
-    return _construct_response_error(429, message, "LimitExceeded")
-
-
-def construct_response_server_error():
-    return _construct_response_error(500, "Something is wrong!", "GeneralError")
-
-
-def _construct_response_error(status_code, message, code):
-    result = {
-        'status_code': status_code,
-        'body': {'code': code, 'message': message},
-        'headers': {
-            'Content-Type': 'application/json',
-        },
-    }
-    logger.info(f'constructing error response - {result}')
-    return result
-
-
-def _construct_response_success(response_body=None):
-    result = {
-        'status_code': 200,
-        'body': '' if response_body is None else json.dumps(response_body),
-        'headers': {
-            'Content-Type': 'application/json',
-        },
-    }
-    logger.info(f'constructing success response - {result}')
-    return result
-

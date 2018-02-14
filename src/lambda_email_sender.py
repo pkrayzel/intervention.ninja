@@ -1,9 +1,9 @@
-from services import notification
 from services.mail import MailService
 from services.template import TemplateServiceS3
-import time
 import logging
 import json
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -14,22 +14,30 @@ mail_template_service = TemplateServiceS3('www.intervention.ninja', 'emails/')
 MAIL_SUBJECT = 'Intervention Ninja - personal message'
 MAIL_SENDER = 'intervention.ninja@gmail.com'
 
+patch_all()
+
 
 def lambda_handler(event, context):
-    logger.info('event: {}'.format(event))
+    logger.info(f'lambda handler event: {event}')
     records = event['Records']
-    for item in records:
+
+    logger.info(f'Number of emails to send out: {len(records)}')
+
+    for i, item in enumerate(records):
+        logger.info(f'Preparing to send email number {i+1}...')
+
         message = json.loads(item['Sns']['Message'])
-        logger.info('message: {}'.format(message))
         template = message['template']
         email = message['email']
 
-        start = time.time()
-        content_html = mail_template_service.render_template('{}.html'.format(template))
-        end = time.time()
-        logger.info('Rendering template took: {} seconds'.format(str(end-start)))
+        xray_recorder.begin_subsegment(f'render_template_{i+1}')
 
-        start = time.time()
+        content_html = mail_template_service.render_template(f'{template}.html')
+        logger.info(f'Template {template} successfully rendered')
+
+        xray_recorder.end_segment()
+        xray_recorder.begin_subsegment(f'send_email_{i+1}')
+
         mail.send_mail(MAIL_SUBJECT, MAIL_SENDER, email, content_html)
-        end = time.time()
-        logger.info('Sending email took: {} seconds'.format(str(end - start)))
+
+        logger.info(f'Email with template {template} has been successfully sent to address: {email}')

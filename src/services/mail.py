@@ -18,13 +18,13 @@ class MailService:
                                   subject=subject,
                                   mail_from=(sender, sender))
 
-            logger.info('Sending email to recipient: {}'.format(recipient))
+            logger.debug(f'Sending html email to recipient: {recipient}')
 
             result = message.send(to=(recipient, recipient), smtp=self._get_smtp())
 
             return result.status_code == 250
         except Exception as exception:
-            logger.error('Sending email failed with exception: {}'.format(exception))
+            logger.error('Sending email failed with exception: %s', exception)
             return False
 
     def _get_smtp(self):

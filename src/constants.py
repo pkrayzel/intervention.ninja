@@ -1,0 +1,10 @@
+KEY_BODY = 'body'
+KEY_CONTEXT = 'context'
+
+KEY_EMAIL = 'email'
+KEY_TEMPLATE = 'template'
+KEY_SOURCE_IP = 'source-ip'
+SUPPORTED_TEMPLATES = ['drink', 'smell']
+
+MAX_EMAILS_PER_IP_PER_MINUTE = 1
+MAX_EMAILS_PER_EMAIL_PER_MINUTE = 1
