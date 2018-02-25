@@ -1,9 +1,0 @@
-{
-  "body": {
-    "email": "pkrayzel@gmail.com",
-    "template": "smell"
-  },
-  "context": {
-    "source-ip": "123.3.2.1"
-  }
-}

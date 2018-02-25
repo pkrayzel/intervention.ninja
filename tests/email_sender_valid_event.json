@@ -1,9 +1,9 @@
 {
-  "Records": [
-    {
-      "Sns": {
-        "Message": "{\"template\": \"smell\", \"email\": \"pkrayzel@gmail.com\"}"
-      }
-    }
-  ]
+  "body": {
+    "email": "pkrayzel@gmail.com",
+    "template": "smell"
+  },
+  "context": {
+    "source-ip": "123.3.2.1"
+  }
 }

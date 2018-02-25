@@ -118,7 +118,7 @@
       }
     },
     "EmailsPOST": {
-      "DependsOn": "LambdaSNSPublisherPermission",
+      "DependsOn": "LambdaEmailSenderPermission",
       "Type": "AWS::ApiGateway::Method",
       "Properties": {
         "AuthorizationType": "NONE",
@@ -127,7 +127,7 @@
           "Type": "AWS",
           "IntegrationHttpMethod": "POST",
           "Uri": {"Fn::Join": ["",
-            ["arn:aws:apigateway:", {"Ref": "AWS::Region"}, ":lambda:path/2015-03-31/functions/", {"Fn::GetAtt": ["LambdaSNSPublisher", "Arn"]}, "/invocations"]
+            ["arn:aws:apigateway:", {"Ref": "AWS::Region"}, ":lambda:path/2015-03-31/functions/", {"Fn::GetAtt": ["LambdaEmailSender", "Arn"]}, "/invocations"]
           ]},
           "IntegrationResponses": [{
             "StatusCode": 200,
@@ -201,7 +201,7 @@
       }
     },
     "EmailsOPTIONS": {
-      "DependsOn": "LambdaSNSPublisherPermission",
+      "DependsOn": "LambdaEmailSenderPermission",
       "Type": "AWS::ApiGateway::Method",
       "Properties": {
         "AuthorizationType": "NONE",
@@ -239,38 +239,33 @@
         }]
       }
     },
-    "LambdaSNSPublisherPermission": {
+    "LambdaEmailSenderPermission": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
         "Action": "lambda:invokeFunction",
-        "FunctionName": {"Fn::GetAtt": ["LambdaSNSPublisher", "Arn"]},
+        "FunctionName": {"Fn::GetAtt": ["LambdaEmailSender", "Arn"]},
         "Principal": "apigateway.amazonaws.com",
         "SourceArn": {"Fn::Join": ["", ["arn:aws:execute-api:", {"Ref": "AWS::Region"}, ":", {"Ref": "AWS::AccountId"}, ":", {"Ref": "RestApi"}, "/*"]]}
       }
     },
-    "LambdaSNSPublisher": {
+    "LambdaEmailSender": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "lambda_sns_publisher.lambda_handler",
-        "Role": { "Fn::GetAtt" : ["LambdaSNSPublisherExecutionRole", "Arn"] },
-        "Description": "Checks allowed limits and publishes events into SNS topic",
-        "FunctionName": "intervention-ninja-sns-publisher",
+        "Role": { "Fn::GetAtt" : ["LambdaEmailSenderExecutionRole", "Arn"] },
+        "Description": "Checks allowed limits and sends templated email if possible",
+        "FunctionName": "intervention-ninja-email-sender",
         "MemorySize": 128,
         "Timeout": 30,
-        "Environment": {
-          "Variables": {
-            "TOPIC_ARN": {"Ref": "EmailsSNSTopic"}
-          }
-        },
         "Code": {
           "S3Bucket" : "intervention-ninja-deployment-support",
-          "S3Key" : "lambda_sns_publisher.zip"
+          "S3Key" : "lambda_email_sender.zip"
         },
         "Runtime": "python3.6"
       },
-      "DependsOn" : ["EmailsSNSTopic", "LambdaSNSPublisherExecutionRole"]
+      "DependsOn" : ["LambdaEmailSenderExecutionRole"]
     },
-    "LambdaSNSPublisherExecutionRole": {
+    "LambdaEmailSenderExecutionRole": {
       "Type": "AWS::IAM::Role",
       "Properties":
       {
@@ -327,89 +322,6 @@
             }
           },
           {
-            "PolicyName": "SNSPublishAccess",
-            "PolicyDocument":
-            {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "SNS:Publish"
-                  ],
-                  "Resource": {"Fn::Join": ["",
-                    ["arn:aws:sns:", {"Ref": "AWS::Region"}, ":", {"Ref": "AWS::AccountId"}, ":intervention-ninja-*"]
-                  ]}
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "LambdaEmailSenderPermission": {
-      "Type": "AWS::Lambda::Permission",
-      "Properties": {
-        "Action": "lambda:invokeFunction",
-        "FunctionName": {"Fn::GetAtt": ["LambdaEmailSender", "Arn"]},
-        "Principal": "sns.amazonaws.com"
-      }
-    },
-    "LambdaEmailSender": {
-      "Type": "AWS::Lambda::Function",
-      "Properties": {
-        "Handler": "lambda_email_sender.lambda_handler",
-        "Role": { "Fn::GetAtt" : ["LambdaEmailSenderExecutionRole", "Arn"] },
-        "Description": "Sends emails to users from intervention ninja",
-        "FunctionName": "intervention-ninja-email-sender",
-        "MemorySize": 128,
-        "Timeout": 30,
-        "Code": {
-          "S3Bucket" : "intervention-ninja-deployment-support",
-          "S3Key" : "lambda_email_sender.zip"
-        },
-        "Runtime": "python3.6"
-      },
-      "DependsOn" : ["LambdaEmailSenderExecutionRole"]
-    },
-    "LambdaEmailSenderExecutionRole": {
-      "Type": "AWS::IAM::Role",
-      "Properties":
-      {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal":
-              {
-                "Service": ["lambda.amazonaws.com"]
-              },
-              "Action": ["sts:AssumeRole"]
-            }
-          ]
-        },
-        "Path": "/serviceroles/",
-        "Policies": [
-          {
-            "PolicyName": "CloudWatchLogs",
-            "PolicyDocument":
-            {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "logs:CreateLogGroup",
-                    "logs:CreateLogStream",
-                    "logs:PutLogEvents"
-                  ],
-                  "Resource": "arn:aws:logs:*:*:*"
-                }
-              ]
-            }
-          },
-          {
             "PolicyName": "SendingEmail",
             "PolicyDocument":
             {
@@ -427,16 +339,6 @@
           }
         ]
       }
-    },
-    "EmailsSNSTopic" : {
-       "Type" : "AWS::SNS::Topic",
-       "Properties" : {
-          "Subscription" : [
-             { "Endpoint" : { "Fn::GetAtt" : [ "LambdaEmailSender", "Arn" ] }, "Protocol" : "lambda" }
-          ],
-          "TopicName" : "intervention-ninja-outgoing-emails-topic"
-       },
-      "DependsOn": "LambdaEmailSender"
     },
     "InterventionNinjaEmailsTable": {
       "Type" : "AWS::DynamoDB::Table",

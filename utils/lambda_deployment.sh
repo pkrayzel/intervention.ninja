@@ -5,7 +5,7 @@
 # ********************************
 LAMBDA_FUNCTION_NAME_PREFIX="intervention-ninja-"
 FILE_NAME_PREFIX="lambda_"
-SUFFIX="sns-publisher"
+SUFFIX="email-sender"
 
 if [ "$#" -eq 1 ]; then
     SUFFIX=$1
