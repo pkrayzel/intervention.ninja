@@ -251,7 +251,7 @@
     "LambdaEmailSender": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
-        "Handler": "lambda_sns_publisher.lambda_handler",
+        "Handler": "lambda_email_sender.lambda_handler",
         "Role": { "Fn::GetAtt" : ["LambdaEmailSenderExecutionRole", "Arn"] },
         "Description": "Checks allowed limits and sends templated email if possible",
         "FunctionName": "intervention-ninja-email-sender",
