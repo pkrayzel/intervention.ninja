@@ -408,6 +408,22 @@
                 }
               ]
             }
+          },
+          {
+            "PolicyName": "SendingEmail",
+            "PolicyDocument":
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ses:SendTemplatedEmail"
+                  ],
+                  "Resource": "arn:aws:ses:*:*:identity/intervention.ninja"
+                }
+              ]
+            }
           }
         ]
       }
