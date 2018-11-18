@@ -1,11 +1,9 @@
-FROM jfloff/alpine-python:latest
+FROM library/python:alpine3.7
 
-MAINTAINER Pavel Krayzel "pkrayzel@gmail.com"
+ADD ./src /opt/intervention-ninja
+WORKDIR /opt/intervention-ninja
 
-COPY . /app
-WORKDIR /app/src
-
-RUN pip install -r /app/requirements.txt
+RUN pip install Flask==0.12.2
 
 EXPOSE 5000
 
