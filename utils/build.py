@@ -12,4 +12,3 @@ freezer = Freezer(app)
 if __name__ == '__main__':
     freezer.freeze()
     time.sleep(5)
-    os.system('open build/index.html')
