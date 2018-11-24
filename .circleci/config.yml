@@ -9,6 +9,7 @@ jobs:
       - run: pip install -r requirements.txt
       # creating distribution of website
       - run: cd utils/
+      - run: ls
       - run: python build.py
       # deploy it to s3
       - run: aws s3 sync build/ $S3_BUCKET_NAME
