@@ -10,6 +10,6 @@ jobs:
       # creating distribution of website
       - run: cd utils/ && python build.py
       # deploy it to s3
-      - run: aws s3 sync build/ $S3_BUCKET_NAME
+      - run: aws s3 sync utils/build/ $S3_BUCKET_NAME
       # invalidate the whole cloudfront distribution
       - run: aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
