@@ -5,6 +5,6 @@ WORKDIR /opt/intervention-ninja
 
 RUN pip install Flask==0.12.2
 
-EXPOSE 5000
+EXPOSE 80
 
 CMD ["python", "app.py"]
